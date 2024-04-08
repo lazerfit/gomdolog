@@ -14,6 +14,7 @@ public class PostResponse {
     private final LocalDateTime modifiedDate;
     private final String thumbnail;
     private final Long views;
+    private final String categoryTitle;
 
     public PostResponse(Post post) {
         id = post.getId();
@@ -23,5 +24,6 @@ public class PostResponse {
         modifiedDate = post.getModifiedDate();
         thumbnail = post.getThumbnail();
         views = post.getViews();
+        categoryTitle = post.getCategory().getTitle();
     }
 }

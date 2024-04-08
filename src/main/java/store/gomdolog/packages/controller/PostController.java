@@ -1,6 +1,7 @@
 package store.gomdolog.packages.controller;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -31,5 +32,10 @@ public class PostController {
     @GetMapping("/post/{id}")
     public PostResponse findById(@PathVariable Long id) {
         return postService.findById(id);
+    }
+
+    @GetMapping("/post/all")
+    public List<PostResponse> findAll() {
+        return postService.findAll();
     }
 }

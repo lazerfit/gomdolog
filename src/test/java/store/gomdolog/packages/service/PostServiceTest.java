@@ -66,4 +66,21 @@ class PostServiceTest {
         assertThat(foundPost.getViews()).isZero();
         assertThat(foundPost.getThumbnail()).isEqualTo("Default Thumbnail");
     }
+
+    @Test
+    void findAll() {
+        Category category = categoryRepository.findAll().get(0);
+
+        for (int i=0; i < 5; i++) {
+            postRepository.save(Post.builder()
+                .title("제목"+i)
+                .content("본문"+i)
+                .category(category)
+                .build());
+        }
+
+        List<Post> all = postRepository.findAll();
+
+        assertThat(all).hasSize(5);
+    }
 }

@@ -1,5 +1,6 @@
 package store.gomdolog.packages.service;
 
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -38,5 +39,10 @@ public class PostService {
         Post post = postRepository.findById(id).orElseThrow();
 
         return new PostResponse(post);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostResponse> findAll() {
+        return postRepository.findAll().stream().map(PostResponse::new).toList();
     }
 }

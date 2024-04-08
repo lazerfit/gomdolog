@@ -11,7 +11,7 @@ public class CategoryResponse {
     private final String title;
 
     public CategoryResponse(Category category) {
-        this.id = category.getId();
-        this.title = category.getTitle();
+        id = category.getId();
+        title = category.getTitle();
     }
 }

@@ -4,9 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -76,15 +78,36 @@ class PostControllerTest {
 
     @Test
     void findById()throws Exception {
+        Category category = categoryRepository.findAll().get(0);
+
         Post post = postRepository.save(Post.builder()
             .title("제목")
             .content("내용")
             .views(0L)
             .thumbnail("Default Thumbnail")
+            .category(category)
             .build());
 
         mockMvc.perform(get("/api/post/"+post.getId()))
             .andDo(print())
             .andExpect(status().isOk());
+    }
+
+    @Test
+    void findAll() throws Exception {
+        Category category = categoryRepository.findAll().get(0);
+
+        for (int i=0; i < 5; i++) {
+            postRepository.save(Post.builder()
+                .title("제목"+i)
+                .content("본문"+i)
+                .category(category)
+                .build());
+        }
+
+        mockMvc.perform(get("/api/post/all"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", Matchers.hasSize(5)));
     }
 }
