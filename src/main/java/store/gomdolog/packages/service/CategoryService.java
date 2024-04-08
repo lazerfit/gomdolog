@@ -26,6 +26,11 @@ public class CategoryService {
         return categoryRepository.findAll().stream().map(CategoryResponse::new).toList();
     }
 
+    @Transactional(readOnly = true)
+    public Category findByTitle(String title) {
+        return categoryRepository.findByTitle(title);
+    }
+
     @Transactional
     public void delete(Long id) {
         categoryRepository.deleteById(id);

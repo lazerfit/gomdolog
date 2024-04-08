@@ -7,14 +7,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
+import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
 import store.gomdolog.packages.dto.PostSaveRequest;
+import store.gomdolog.packages.repository.CategoryRepository;
 import store.gomdolog.packages.repository.PostRepository;
 
 @SpringBootTest
@@ -30,11 +35,28 @@ class PostControllerTest {
     @Autowired
     private PostRepository postRepository;
 
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @BeforeEach
+    void setUp() {
+        Category category = new Category("vue.js");
+        categoryRepository.save(category);
+    }
+
+    @AfterEach
+    void tearDown() {
+        postRepository.deleteAll();
+        categoryRepository.deleteAll();
+    }
+
     @Test
+    @Transactional
     void save() throws Exception {
         PostSaveRequest req = PostSaveRequest.builder()
             .title("제목")
             .content("내용")
+            .categoryTitle("vue.js")
             .build();
 
         mockMvc.perform(post("/api/post/new")
@@ -48,6 +70,7 @@ class PostControllerTest {
         assertThat(post.getTitle()).isEqualTo("제목");
         assertThat(post.getContent()).isEqualTo("내용");
         assertThat(post.getViews()).isZero();
+        assertThat(post.getCategory().getTitle()).isEqualTo("vue.js");
         assertThat(post.getThumbnail()).isEqualTo("Default Thumbnail");
     }
 

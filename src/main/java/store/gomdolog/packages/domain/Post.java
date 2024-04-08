@@ -3,10 +3,13 @@ package store.gomdolog.packages.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,6 +27,7 @@ public class Post {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "POST_ID")
     private Long id;
 
     @Column(nullable = false)
@@ -45,12 +49,17 @@ public class Post {
     @Column(length = 500)
     private String thumbnail;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CATEGORY_ID")
+    private Category category;
+
     @Builder
-    public Post(String title, String content, Long views, String thumbnail) {
+    public Post(String title, String content, Long views, String thumbnail, Category category) {
         this.title = title;
         this.content = content;
         this.views = views;
         this.thumbnail = thumbnail;
+        this.category = category;
     }
 
     public void addViews() {
