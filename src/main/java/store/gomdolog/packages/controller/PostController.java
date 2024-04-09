@@ -38,4 +38,9 @@ public class PostController {
     public List<PostResponse> findAll() {
         return postService.findAll();
     }
+
+    @PostMapping("/post/delete/{id}")
+    public void delete(@PathVariable Long id) {
+        postService.delete(id);
+    }
 }

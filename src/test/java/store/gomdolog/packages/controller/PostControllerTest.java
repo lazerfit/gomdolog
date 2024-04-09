@@ -110,4 +110,20 @@ class PostControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", Matchers.hasSize(5)));
     }
+
+    @Test
+    void delete() throws Exception {
+        Category category = new Category("Spring");
+        categoryRepository.save(category);
+        Post saved = postRepository.save(Post.builder()
+            .title("제목")
+            .content("content")
+            .category(category)
+            .views(0L)
+            .build());
+
+        mockMvc.perform(post("/api/post/delete/"+saved.getId()))
+            .andDo(print())
+            .andExpect(status().isOk());
+    }
 }

@@ -62,6 +62,10 @@ public class Post {
         this.category = category;
     }
 
+    public void updateCategory(Category category) {
+        this.category = category;
+    }
+
     public void addViews() {
         views += 1;
     }

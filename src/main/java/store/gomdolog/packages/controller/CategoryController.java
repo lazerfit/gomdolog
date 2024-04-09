@@ -42,5 +42,4 @@ public class CategoryController {
     public void update(@RequestBody @Valid CategoryUpdate update) {
         categoryService.update(update);
     }
-
 }

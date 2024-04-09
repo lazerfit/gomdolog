@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Category;
+import store.gomdolog.packages.domain.Post;
 import store.gomdolog.packages.dto.CategoryUpdate;
 import store.gomdolog.packages.repository.CategoryRepository;
+import store.gomdolog.packages.repository.PostRepository;
 
 @SpringBootTest
 class CategoryServiceTest {
@@ -18,19 +20,26 @@ class CategoryServiceTest {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired
+    private PostRepository postRepository;
+
+    @Autowired
+    private PostCategoryService postCategoryService;
+
+    @Autowired
+    private CategoryService categoryService;
+
     @AfterEach
     void tearDown() {
+        postRepository.deleteAll();
         categoryRepository.deleteAll();
     }
 
     @Test
     void save() {
         Category category = new Category("Vue.js");
-
         Category saved = categoryRepository.save(category);
-
         Category category1 = categoryRepository.findAll().get(0);
-
         assertThat(saved.getTitle()).isEqualTo(category1.getTitle());
     }
 
@@ -59,6 +68,60 @@ class CategoryServiceTest {
 
         List<Category> all = categoryRepository.findAll();
         assertThat(all).isEmpty();
+    }
+
+    @Test
+    @Transactional
+    void delete2() {
+        Category category = new Category("Vue.js");
+        Category defaultCategory = new Category("없음");
+        Category savedCategory = categoryRepository.save(category);
+        Category savedDefault = categoryRepository.save(defaultCategory);
+        Post saved = postRepository.save(Post.builder()
+            .title("제목")
+            .content("content")
+            .category(category)
+            .views(0L)
+            .build());
+
+        saved.updateCategory(savedDefault);
+
+        categoryRepository.deleteById(savedCategory.getId());
+        List<Category> all = categoryRepository.findAll();
+        assertThat(all).hasSize(1);
+    }
+
+    @Test
+    @Transactional
+    void delete3() {
+        Category category = new Category("Vue.js");
+
+        categoryRepository.save(category);
+
+        Post saved = postRepository.save(Post.builder()
+            .title("제목")
+            .content("content")
+            .category(category)
+            .views(0L)
+            .build());
+
+        List<Post> postList = postCategoryService.findPostsByCategory(category);
+
+        if (!isDefaultCategoryExist()) {
+            Category defaultCategory = categoryRepository.save(new Category("없음"));
+            postList.forEach(post -> post.updateCategory(defaultCategory));
+        } else {
+            Category defaultCategory = categoryRepository.findByTitle("없음");
+            postList.forEach(post -> post.updateCategory(defaultCategory));
+        }
+
+        categoryRepository.deleteById(category.getId());
+
+        assertThat(categoryRepository.findAll()).hasSize(1);
+    }
+
+    private boolean isDefaultCategoryExist() {
+        return categoryRepository.findByTitle("없음") != null;
     }
 
     @Test
