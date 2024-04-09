@@ -2,6 +2,7 @@ package store.gomdolog.packages.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -10,8 +11,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
+import store.gomdolog.packages.dto.PostUpdate;
 import store.gomdolog.packages.repository.CategoryRepository;
 import store.gomdolog.packages.repository.PostRepository;
 
@@ -47,6 +50,7 @@ class PostServiceTest {
             .content("content")
             .category(postCategoryService.findCategoryByTitle("spring"))
             .views(0L)
+            .tags(Arrays.asList("spring","vue.js"))
             .build());
 
         assertThat(postRepository.findAll()).hasSize(1);
@@ -99,5 +103,48 @@ class PostServiceTest {
         postRepository.deleteById(post.getId());
 
         assertThat(postRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    @Transactional
+    void update() {
+        Post post = postRepository.save(Post.builder()
+            .title("제목")
+            .content("content")
+            .category(postCategoryService.findCategoryByTitle("spring"))
+            .views(0L)
+            .tags(Arrays.asList("spring", "vue.js"))
+            .build());
+
+        PostUpdate postUpdate = new PostUpdate(post.getId(), "수정 제목", "수정 본문", "spring",
+            Arrays.asList("spring", "vue.js"));
+
+        post.update(postUpdate);
+
+        Post updatedPost = postRepository.findById(post.getId()).orElseThrow();
+
+        assertThat(updatedPost.getTitle()).isEqualTo("수정 제목");
+        assertThat(updatedPost.getContent()).isEqualTo("수정 본문");
+    }
+
+    @Test
+    @Transactional
+    void updateCategory() {
+        Category category = new Category("vue.js");
+        categoryRepository.save(category);
+
+        Post post = postRepository.save(Post.builder()
+            .title("제목")
+            .content("content")
+            .category(postCategoryService.findCategoryByTitle("spring"))
+            .views(0L)
+            .tags(Arrays.asList("spring", "vue.js"))
+            .build());
+
+        post.updateCategory(category);
+
+        Post updatedPost = postRepository.findById(post.getId()).orElseThrow();
+
+        assertThat(updatedPost.getCategory()).isEqualTo(category);
     }
 }

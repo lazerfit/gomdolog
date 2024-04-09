@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import store.gomdolog.packages.dto.PostResponse;
 import store.gomdolog.packages.dto.PostSaveRequest;
+import store.gomdolog.packages.dto.PostUpdate;
 import store.gomdolog.packages.service.PostService;
 
 @Slf4j
@@ -26,7 +27,13 @@ public class PostController {
 
     @PostMapping("/post/new")
     public void save(@Valid @RequestBody PostSaveRequest req) {
+        log.info("save post {}", req);
         postService.save(req);
+    }
+
+    @PostMapping("/post/update")
+    public void update(@RequestBody @Valid PostUpdate postUpdate) {
+        postService.update(postUpdate);
     }
 
     @GetMapping("/post/{id}")

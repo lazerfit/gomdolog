@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
 import store.gomdolog.packages.dto.PostSaveRequest;
+import store.gomdolog.packages.dto.PostUpdate;
 import store.gomdolog.packages.repository.CategoryRepository;
 import store.gomdolog.packages.repository.PostRepository;
 
@@ -59,6 +61,7 @@ class PostControllerTest {
             .title("제목")
             .content("내용")
             .categoryTitle("vue.js")
+            .tags(Arrays.asList("spring","vue.js"))
             .build();
 
         mockMvc.perform(post("/api/post/new")
@@ -86,11 +89,17 @@ class PostControllerTest {
             .views(0L)
             .thumbnail("Default Thumbnail")
             .category(category)
+            .tags(Arrays.asList("spring","vue.js"))
             .build());
 
         mockMvc.perform(get("/api/post/"+post.getId()))
             .andDo(print())
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.title").value("제목"))
+            .andExpect(jsonPath("$.content").value("내용"))
+            .andExpect(jsonPath("$.views").value("0"))
+            .andExpect(jsonPath("$.categoryTitle").value("vue.js"))
+            .andExpect(jsonPath("$.tags", Matchers.containsInAnyOrder("spring","vue.js")));
     }
 
     @Test
@@ -123,6 +132,26 @@ class PostControllerTest {
             .build());
 
         mockMvc.perform(post("/api/post/delete/"+saved.getId()))
+            .andDo(print())
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void update() throws Exception{
+        Post post = postRepository.save(Post.builder()
+            .title("제목")
+            .content("content")
+            .category(categoryRepository.findByTitle("vue.js"))
+            .views(0L)
+            .tags(Arrays.asList("spring", "vue.js"))
+            .build());
+
+        PostUpdate postUpdate = new PostUpdate(post.getId(), "수정 제목", "수정 본문", "spring",
+            Arrays.asList("spring", "vue.js"));
+
+        mockMvc.perform(post("/api/post/update")
+                .content(objectMapper.writeValueAsString(postUpdate))
+                .contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
             .andExpect(status().isOk());
     }

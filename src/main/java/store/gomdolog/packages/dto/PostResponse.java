@@ -1,6 +1,7 @@
 package store.gomdolog.packages.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.Getter;
 import store.gomdolog.packages.domain.Post;
 
@@ -15,6 +16,7 @@ public class PostResponse {
     private final String thumbnail;
     private final Long views;
     private final String categoryTitle;
+    private final List<String> tags;
 
     public PostResponse(Post post) {
         id = post.getId();
@@ -25,5 +27,6 @@ public class PostResponse {
         thumbnail = post.getThumbnail();
         views = post.getViews();
         categoryTitle = post.getCategory().getTitle();
+        tags = post.getTags();
     }
 }
