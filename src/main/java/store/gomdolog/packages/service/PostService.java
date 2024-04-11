@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
 import store.gomdolog.packages.dto.PostResponse;
+import store.gomdolog.packages.dto.PostResponseWithoutTags;
 import store.gomdolog.packages.dto.PostSaveRequest;
 import store.gomdolog.packages.dto.PostUpdate;
 import store.gomdolog.packages.repository.PostRepository;
@@ -40,13 +41,12 @@ public class PostService {
     @Transactional(readOnly = true)
     public PostResponse findById(Long id) {
         Post post = postRepository.findById(id).orElseThrow();
-
         return new PostResponse(post);
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponse> findAll() {
-        return postRepository.findAll().stream().map(PostResponse::new).toList();
+    public List<PostResponseWithoutTags> findAll() {
+        return postRepository.fetchPosts();
     }
 
     @Transactional
@@ -66,6 +66,11 @@ public class PostService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public List<PostResponseWithoutTags> getPopularPosts() {
+        return postRepository.getPopularPosts().stream().map(PostResponseWithoutTags::new).toList();
+    }
+
     private String extractThumbnail(String html) {
         Pattern imgPattern = Pattern.compile("<img[^>]+src\\s*=\\s*\"([^\"]+)\"");
         Matcher imgMatcher = imgPattern.matcher(html);
@@ -74,5 +79,15 @@ public class PostService {
             return imgMatcher.group(1);
         }
         return "Default Thumbnail";
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostResponseWithoutTags> searchPostsByTitle(String q) {
+        return postRepository.searchPostsByTitle(q);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostResponseWithoutTags> searchPostsByCategory(String q) {
+        return postRepository.searchPostsByCategory(q);
     }
 }

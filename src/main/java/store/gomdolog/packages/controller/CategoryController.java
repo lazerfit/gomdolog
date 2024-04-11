@@ -3,6 +3,7 @@ package store.gomdolog.packages.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +16,7 @@ import store.gomdolog.packages.dto.CategorySaveRequest;
 import store.gomdolog.packages.dto.CategoryUpdate;
 import store.gomdolog.packages.service.CategoryService;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @CrossOrigin(maxAge = 3600, origins = "http://localhost:5173")
@@ -34,7 +36,7 @@ public class CategoryController {
     }
 
     @PostMapping("/category/delete/{id}")
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable Long id ) {
         categoryService.delete(id);
     }
 

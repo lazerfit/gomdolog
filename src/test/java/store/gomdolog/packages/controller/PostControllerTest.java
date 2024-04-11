@@ -1,6 +1,8 @@
 package store.gomdolog.packages.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -9,7 +11,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -99,7 +100,7 @@ class PostControllerTest {
             .andExpect(jsonPath("$.content").value("내용"))
             .andExpect(jsonPath("$.views").value("0"))
             .andExpect(jsonPath("$.categoryTitle").value("vue.js"))
-            .andExpect(jsonPath("$.tags", Matchers.containsInAnyOrder("spring","vue.js")));
+            .andExpect(jsonPath("$.tags", containsInAnyOrder("spring","vue.js")));
     }
 
     @Test
@@ -117,7 +118,7 @@ class PostControllerTest {
         mockMvc.perform(get("/api/post/all"))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$", Matchers.hasSize(5)));
+            .andExpect(jsonPath("$", hasSize(5)));
     }
 
     @Test
@@ -154,5 +155,48 @@ class PostControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
             .andExpect(status().isOk());
+    }
+
+    @Test
+    void popularPost() throws Exception {
+        Category category = categoryRepository.findAll().get(0);
+
+        for (int i=0; i < 5; i++) {
+            postRepository.save(Post.builder()
+                .title("제목"+i)
+                .content("본문"+i)
+                .category(category)
+                .build());
+        }
+
+        mockMvc.perform(get("/api/post/popular"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(3)));
+    }
+
+    @Test
+    void 제목_검색() throws Exception {
+        Category category = categoryRepository.findAll().get(0);
+
+        for (int i=0; i < 5; i++) {
+            postRepository.save(Post.builder()
+                .title("제목"+i)
+                .content("본문"+i)
+                .category(category)
+                .build());
+        }
+
+        postRepository.save(Post.builder()
+            .title("title")
+            .content("content")
+            .category(category)
+            .build());
+
+        mockMvc.perform(get("/api/post/search")
+                .param("q", "title")
+            ).andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)));
     }
 }

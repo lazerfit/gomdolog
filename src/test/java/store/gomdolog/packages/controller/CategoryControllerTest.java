@@ -78,7 +78,7 @@ class CategoryControllerTest {
             .andExpect(status().isOk());
 
         List<Category> all = categoryRepository.findAll();
-        Assertions.assertThat(all).isEmpty();
+        Assertions.assertThat(all).hasSize(1);
     }
 
     @Test

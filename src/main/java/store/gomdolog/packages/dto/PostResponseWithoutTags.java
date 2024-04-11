@@ -1,12 +1,12 @@
 package store.gomdolog.packages.dto;
 
+import com.querydsl.core.annotations.QueryProjection;
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.Getter;
 import store.gomdolog.packages.domain.Post;
 
 @Getter
-public class PostResponse {
+public class PostResponseWithoutTags {
 
     private final Long id;
     private final String title;
@@ -14,15 +14,24 @@ public class PostResponse {
     private final LocalDateTime createdDate;
     private final String thumbnail;
     private final String categoryTitle;
-    private final List<String> tags;
 
-    public PostResponse(Post post) {
+    public PostResponseWithoutTags(Post post) {
         id = post.getId();
         title = post.getTitle();
         content = post.getContent();
         createdDate = post.getCreatedDate();
         thumbnail = post.getThumbnail();
         categoryTitle = post.getCategory().getTitle();
-        tags = post.getTags();
+    }
+
+    @QueryProjection
+    public PostResponseWithoutTags(Long id, String title, String content, LocalDateTime createdDate,
+        String thumbnail, String categoryTitle) {
+        this.id = id;
+        this.title = title;
+        this.content = content;
+        this.createdDate = createdDate;
+        this.thumbnail = thumbnail;
+        this.categoryTitle = categoryTitle;
     }
 }

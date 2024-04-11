@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
+import store.gomdolog.packages.dto.PostResponseWithoutTags;
 import store.gomdolog.packages.dto.PostUpdate;
 import store.gomdolog.packages.repository.CategoryRepository;
 import store.gomdolog.packages.repository.PostRepository;
@@ -68,7 +69,7 @@ class PostServiceTest {
                 .build());
         }
 
-        List<Post> all = postRepository.findAll();
+        List<PostResponseWithoutTags> all = postRepository.fetchPosts();
 
         assertThat(all).hasSize(5);
     }
@@ -146,5 +147,47 @@ class PostServiceTest {
         Post updatedPost = postRepository.findById(post.getId()).orElseThrow();
 
         assertThat(updatedPost.getCategory()).isEqualTo(category);
+    }
+
+    @Test
+    @Transactional
+    void getPostCategory() {
+        Category category = categoryRepository.findAll().get(0);
+
+        for (int i=0; i < 5; i++) {
+            postRepository.save(Post.builder()
+                .title("제목"+i)
+                .content("본문"+i)
+                .category(category)
+                .build());
+        }
+
+        List<Post> popularPosts = postRepository.getPopularPosts();
+
+        System.out.println(popularPosts);
+        assertThat(popularPosts).hasSize(3);
+    }
+
+    @Test
+    void 제목_검색() {
+        Category category = categoryRepository.findAll().get(0);
+
+        for (int i=0; i < 5; i++) {
+            postRepository.save(Post.builder()
+                .title("제목"+i)
+                .content("본문"+i)
+                .category(category)
+                .build());
+        }
+
+        postRepository.save(Post.builder()
+            .title("title")
+            .content("content")
+            .category(category)
+            .build());
+
+        List<PostResponseWithoutTags> postsByTitle = postRepository.searchPostsByTitle("제목");
+
+        assertThat(postsByTitle).hasSize(5);
     }
 }

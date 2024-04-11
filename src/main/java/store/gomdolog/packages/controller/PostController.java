@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import store.gomdolog.packages.dto.PostResponse;
+import store.gomdolog.packages.dto.PostResponseWithoutTags;
 import store.gomdolog.packages.dto.PostSaveRequest;
 import store.gomdolog.packages.dto.PostUpdate;
 import store.gomdolog.packages.service.PostService;
@@ -27,7 +29,6 @@ public class PostController {
 
     @PostMapping("/post/new")
     public void save(@Valid @RequestBody PostSaveRequest req) {
-        log.info("save post {}", req);
         postService.save(req);
     }
 
@@ -42,12 +43,27 @@ public class PostController {
     }
 
     @GetMapping("/post/all")
-    public List<PostResponse> findAll() {
+    public List<PostResponseWithoutTags> findAll() {
         return postService.findAll();
     }
 
     @PostMapping("/post/delete/{id}")
     public void delete(@PathVariable Long id) {
         postService.delete(id);
+    }
+
+    @GetMapping("/post/popular")
+    public List<PostResponseWithoutTags> findPopular() {
+        return postService.getPopularPosts();
+    }
+
+    @GetMapping("/post/search")
+    public List<PostResponseWithoutTags> searchPostsByTitle(@RequestParam("q") String q) {
+        return postService.searchPostsByTitle(q);
+    }
+
+    @GetMapping("/post/category")
+    public List<PostResponseWithoutTags> searchPostByCategory(@RequestParam("title") String q) {
+        return postService.searchPostsByCategory(q);
     }
 }

@@ -2,6 +2,7 @@ package store.gomdolog.packages.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Category;
@@ -11,6 +12,7 @@ import store.gomdolog.packages.dto.CategorySaveRequest;
 import store.gomdolog.packages.dto.CategoryUpdate;
 import store.gomdolog.packages.repository.CategoryRepository;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CategoryService {
