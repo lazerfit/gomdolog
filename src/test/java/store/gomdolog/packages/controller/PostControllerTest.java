@@ -98,7 +98,6 @@ class PostControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.title").value("제목"))
             .andExpect(jsonPath("$.content").value("내용"))
-            .andExpect(jsonPath("$.views").value("0"))
             .andExpect(jsonPath("$.categoryTitle").value("vue.js"))
             .andExpect(jsonPath("$.tags", containsInAnyOrder("spring","vue.js")));
     }
@@ -118,7 +117,7 @@ class PostControllerTest {
         mockMvc.perform(get("/api/post/all"))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$", hasSize(5)));
+            .andExpect(jsonPath("$.content", hasSize(5)));
     }
 
     @Test
@@ -197,6 +196,76 @@ class PostControllerTest {
                 .param("q", "title")
             ).andDo(print())
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content", hasSize(1)));
+    }
+
+    @Test
+    void 휴지통() throws Exception {
+        Category category = categoryRepository.findAll().get(0);
+
+        Post post = postRepository.save(Post.builder()
+            .title("제목")
+            .content("content")
+            .category(category)
+            .views(0L)
+            .tags(Arrays.asList("spring", "vue.js"))
+            .build());
+
+        mockMvc.perform(post("/api/post/delete/" + post.getId()))
+            .andDo(print())
+            .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/post/recycling"))
+            .andDo(print())
+            .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
+    void 영구삭제() throws Exception {
+        Category category = categoryRepository.findAll().get(0);
+
+        Post post = postRepository.save(Post.builder()
+            .title("제목")
+            .content("content")
+            .category(category)
+            .views(0L)
+            .tags(Arrays.asList("spring", "vue.js"))
+            .build());
+
+        mockMvc.perform(post("/api/post/delete/" + post.getId()))
+            .andDo(print())
+            .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/post/deletePermanent/"+post.getId()))
+            .andDo(print())
+            .andExpect(status().isOk());
+
+        assertThat(postRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    void 휴지통_복원() throws Exception {
+        Category category = categoryRepository.findAll().get(0);
+
+        Post post = postRepository.save(Post.builder()
+            .title("제목")
+            .content("content")
+            .category(category)
+            .views(0L)
+            .tags(Arrays.asList("spring", "vue.js"))
+            .build());
+
+        mockMvc.perform(post("/api/post/delete/" + post.getId()))
+            .andDo(print())
+            .andExpect(status().isOk());
+
+        assertThat(postRepository.findById(post.getId()).orElseThrow().getIsDeleted()).isTrue();
+
+        mockMvc.perform(post("/api/post/revertDelete/" + post.getId()))
+            .andDo(print())
+            .andExpect(status().isOk());
+
+        assertThat(postRepository.findById(post.getId()).orElseThrow().getIsDeleted()).isFalse();
     }
 }

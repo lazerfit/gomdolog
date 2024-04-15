@@ -4,10 +4,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
+import store.gomdolog.packages.dto.PostDeletedResponse;
 import store.gomdolog.packages.dto.PostResponse;
 import store.gomdolog.packages.dto.PostResponseWithoutTags;
 import store.gomdolog.packages.dto.PostSaveRequest;
@@ -45,13 +48,25 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponseWithoutTags> findAll() {
-        return postRepository.fetchPosts();
+    public Page<PostResponseWithoutTags> findAll(Pageable pageable) {
+        return postRepository.fetchPosts(pageable);
     }
 
     @Transactional
     public void delete(Long id) {
+        Post post = postRepository.findById(id).orElseThrow();
+        post.moveToRecycleBin();
+    }
+
+    @Transactional
+    public void deletePermanent(Long id) {
         postRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void revertDelete(Long id) {
+        Post post = postRepository.findById(id).orElseThrow();
+        post.revertDelete();
     }
 
     @Transactional
@@ -82,12 +97,17 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponseWithoutTags> searchPostsByTitle(String q) {
-        return postRepository.searchPostsByTitle(q);
+    public Page<PostResponseWithoutTags> searchPostsByTitle(String q, Pageable pageable) {
+        return postRepository.searchPostsByTitle(q,pageable);
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponseWithoutTags> searchPostsByCategory(String q) {
-        return postRepository.searchPostsByCategory(q);
+    public Page<PostResponseWithoutTags> searchPostsByCategory(String q, Pageable pageable) {
+        return postRepository.searchPostsByCategory(q, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostDeletedResponse> fetchDeletedPosts() {
+        return postRepository.fetchDeletedPost();
     }
 }

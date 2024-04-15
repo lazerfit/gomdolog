@@ -11,6 +11,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
@@ -69,7 +71,9 @@ class PostServiceTest {
                 .build());
         }
 
-        List<PostResponseWithoutTags> all = postRepository.fetchPosts();
+        PageRequest pageRequest = PageRequest.of(0, 6);
+
+        Page<PostResponseWithoutTags> all = postRepository.fetchPosts(pageRequest);
 
         assertThat(all).hasSize(5);
     }
@@ -186,8 +190,72 @@ class PostServiceTest {
             .category(category)
             .build());
 
-        List<PostResponseWithoutTags> postsByTitle = postRepository.searchPostsByTitle("제목");
+        PageRequest pageRequest = PageRequest.of(0, 6);
+
+        Page<PostResponseWithoutTags> postsByTitle = postRepository.searchPostsByTitle("제목",pageRequest);
 
         assertThat(postsByTitle).hasSize(5);
+    }
+
+    @Test
+    @Transactional
+    void 휴지통() {
+        Category category = categoryRepository.findAll().get(0);
+
+        Post post = postRepository.save(Post.builder()
+            .title("제목")
+            .content("content")
+            .category(postCategoryService.findCategoryByTitle("spring"))
+            .views(0L)
+            .tags(Arrays.asList("spring", "vue.js"))
+            .build());
+
+        post.moveToRecycleBin();
+
+        assertThat(post.getIsDeleted()).isTrue();
+    }
+
+    @Test
+    @Transactional
+    void 영구삭제() {
+        Category category = categoryRepository.findAll().get(0);
+
+        Post post = postRepository.save(Post.builder()
+            .title("제목")
+            .content("content")
+            .category(postCategoryService.findCategoryByTitle("spring"))
+            .views(0L)
+            .tags(Arrays.asList("spring", "vue.js"))
+            .build());
+
+        post.moveToRecycleBin();
+
+        assertThat(post.getIsDeleted()).isTrue();
+
+        postRepository.deleteById(post.getId());
+
+        assertThat(postRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    @Transactional
+    void 휴지통_복원() {
+        Category category = categoryRepository.findAll().get(0);
+
+        Post post = postRepository.save(Post.builder()
+            .title("제목")
+            .content("content")
+            .category(postCategoryService.findCategoryByTitle("spring"))
+            .views(0L)
+            .tags(Arrays.asList("spring", "vue.js"))
+            .build());
+
+        post.moveToRecycleBin();
+
+        assertThat(post.getIsDeleted()).isTrue();
+
+        post.revertDelete();
+
+        assertThat(post.getIsDeleted()).isFalse();
     }
 }

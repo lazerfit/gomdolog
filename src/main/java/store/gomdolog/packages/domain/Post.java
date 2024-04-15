@@ -61,6 +61,9 @@ public class Post {
     @JoinColumn(name = "CATEGORY_ID")
     private Category category;
 
+    @Column
+    private Boolean isDeleted;
+
     @Builder
     public Post(String title, String content, Long views, String thumbnail, List<String> tags, Category category) {
         this.title = title;
@@ -69,6 +72,7 @@ public class Post {
         this.thumbnail = thumbnail;
         this.tags = tags;
         this.category = category;
+        isDeleted = false;
     }
 
     public void updateCategory(Category category) {
@@ -79,6 +83,14 @@ public class Post {
         title = update.title();
         content = update.content();
         tags = update.tags();
+    }
+
+    public void moveToRecycleBin() {
+        isDeleted = true;
+    }
+
+    public void revertDelete() {
+        isDeleted = false;
     }
 
     public void addViews() {

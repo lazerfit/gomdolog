@@ -1,11 +1,16 @@
 package store.gomdolog.packages.repository;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import store.gomdolog.packages.dto.PostDeletedResponse;
 import store.gomdolog.packages.dto.PostResponseWithoutTags;
 
 public interface PostRepositoryCustom {
 
-    List<PostResponseWithoutTags> searchPostsByTitle(String q);
-    List<PostResponseWithoutTags> searchPostsByCategory(String q);
-    List<PostResponseWithoutTags> fetchPosts();
+    Page<PostResponseWithoutTags> searchPostsByTitle(String q, Pageable pageable);
+    Page<PostResponseWithoutTags> searchPostsByCategory(String q, Pageable pageable);
+    Page<PostResponseWithoutTags> fetchPosts(Pageable pageable);
+
+    List<PostDeletedResponse> fetchDeletedPost();
 }
