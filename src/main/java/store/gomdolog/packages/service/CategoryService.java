@@ -3,6 +3,8 @@ package store.gomdolog.packages.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Category;
@@ -21,16 +23,20 @@ public class CategoryService {
 
     private final PostCategoryService postCategoryService;
 
+    @CacheEvict(value = "categoryCache", allEntries = true)
     @Transactional
     public void save(CategorySaveRequest request) {
         categoryRepository.save(new Category(request.title()));
     }
 
+    @Cacheable(value = "categoryCache", unless = "#result == null")
     @Transactional(readOnly = true)
     public List<CategoryResponse> findAll() {
+
         return categoryRepository.findAll().stream().map(CategoryResponse::new).toList();
     }
 
+    @CacheEvict(value = "categoryCache", allEntries = true)
     @Transactional
     public void delete(Long id) {
         Category category = categoryRepository.findById(id).orElseThrow();
@@ -52,6 +58,7 @@ public class CategoryService {
         return categoryRepository.findByTitle("없음") != null;
     }
 
+    @CacheEvict(value = "categoryCache", allEntries = true)
     @Transactional
     public void update(CategoryUpdate update) {
         Category category = categoryRepository.findById(update.id()).orElseThrow();

@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ public class PostService {
 
     private final PostCategoryService postCategoryService;
 
+    @CacheEvict(value = "{postAllCache, postByCategory}", allEntries = true)
     @Transactional
     public void save(PostSaveRequest request) {
         Category category = postCategoryService.findCategoryByTitle(request.categoryTitle());
@@ -41,19 +44,22 @@ public class PostService {
         postRepository.save(post);
     }
 
+    @Cacheable(value = "postCache", unless = "#result == null", key = "{#id}")
     @Transactional(readOnly = true)
     public PostResponse findById(Long id) {
         Post post = postRepository.findById(id).orElseThrow();
         return new PostResponse(post);
     }
 
+    @Cacheable(value = "postAllCache", key = "{#pageable.pageSize}", unless = "#result == null")
     @Transactional(readOnly = true)
     public Page<PostResponseWithoutTags> findAll(Pageable pageable) {
         return postRepository.fetchPosts(pageable);
     }
 
+    @CacheEvict(value = "{postAllCache, postByCategory}", allEntries = true)
     @Transactional
-    public void delete(Long id) {
+    public void deleteTemporary(Long id) {
         Post post = postRepository.findById(id).orElseThrow();
         post.moveToRecycleBin();
     }
@@ -63,12 +69,14 @@ public class PostService {
         postRepository.deleteById(id);
     }
 
+    @CacheEvict(value = "{postAllCache, postByCategory}", allEntries = true)
     @Transactional
     public void revertDelete(Long id) {
         Post post = postRepository.findById(id).orElseThrow();
         post.revertDelete();
     }
 
+    @CacheEvict(value = "{postAllCache, postByCategory}", allEntries = true)
     @Transactional
     public void update(PostUpdate update) {
         Post post = postRepository.findById(update.id()).orElseThrow();
@@ -101,6 +109,7 @@ public class PostService {
         return postRepository.searchPostsByTitle(q,pageable);
     }
 
+    @Cacheable(value = "postByCategory", key = "{#q, #pageable.pageSize}", unless = "#result == null")
     @Transactional(readOnly = true)
     public Page<PostResponseWithoutTags> searchPostsByCategory(String q, Pageable pageable) {
         return postRepository.searchPostsByCategory(q, pageable);
@@ -109,5 +118,11 @@ public class PostService {
     @Transactional(readOnly = true)
     public List<PostDeletedResponse> fetchDeletedPosts() {
         return postRepository.fetchDeletedPost();
+    }
+
+    @Transactional
+    public void addViews(Long id) {
+        Post post = postRepository.findById(id).orElseThrow();
+        post.addViews();
     }
 }

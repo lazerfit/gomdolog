@@ -7,9 +7,22 @@ spring:
     password: 1111
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
-    open-in-view: false
+    open-in-view: true
     hibernate:
-      ddl-auto: create
-      dialect: org.hibernate.dialect.MySQL8InnoDBDialect
+      ddl-auto: update
       naming:
         implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+  sql:
+    init:
+      mode: never
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: caches, metrics
