@@ -268,4 +268,26 @@ class PostControllerTest {
 
         assertThat(postRepository.findById(post.getId()).orElseThrow().getIsDeleted()).isFalse();
     }
+
+    @Test
+    void 조회수_증가() throws Exception {
+        Category category = categoryRepository.findAll().get(0);
+
+        Post post = postRepository.save(Post.builder()
+            .title("제목")
+            .content("content")
+            .category(category)
+            .views(0L)
+            .tags(Arrays.asList("spring", "vue.js"))
+            .build());
+
+        mockMvc.perform(post("/api/post/"+post.getId()+"/views"))
+            .andDo(print())
+            .andExpect(status().isOk());
+
+        Post foundPost = postRepository.findAll().get(0);
+
+        assertThat(foundPost.getViews()).isEqualTo(1L);
+
+    }
 }

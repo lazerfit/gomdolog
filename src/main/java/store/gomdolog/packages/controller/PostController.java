@@ -25,66 +25,71 @@ import store.gomdolog.packages.service.PostService;
 @RestController
 @RequiredArgsConstructor
 @CrossOrigin(maxAge = 3600, origins = "http://localhost:5173")
-@RequestMapping("/api")
+@RequestMapping("/api/post")
 public class PostController {
 
     private final PostService postService;
 
-    @PostMapping("/post/new")
+    @PostMapping("/new")
     public void save(@Valid @RequestBody PostSaveRequest req) {
         postService.save(req);
     }
 
-    @PostMapping("/post/update")
+    @PostMapping("/update")
     public void update(@RequestBody @Valid PostUpdate postUpdate) {
         postService.update(postUpdate);
     }
 
-    @GetMapping("/post/{id}")
+    @GetMapping("/{id}")
     public PostResponse findById(@PathVariable Long id) {
         return postService.findById(id);
     }
 
-    @GetMapping("/post/all")
+    @GetMapping("/all")
     public Page<PostResponseWithoutTags> findAll(Pageable pageable) {
         return postService.findAll(pageable);
     }
 
-    @PostMapping("/post/delete/{id}")
+    @PostMapping("/delete/{id}")
     public void delete(@PathVariable Long id) {
         log.info("Deleting post with id {}", id);
-        postService.delete(id);
+        postService.deleteTemporary(id);
     }
 
-    @GetMapping("/post/popular")
+    @GetMapping("/popular")
     public List<PostResponseWithoutTags> findPopular() {
         return postService.getPopularPosts();
     }
 
-    @GetMapping("/post/search")
+    @GetMapping("/search")
     public Page<PostResponseWithoutTags> searchPostsByTitle(@RequestParam("q") String q,
         Pageable pageable) {
         return postService.searchPostsByTitle(q, pageable);
     }
 
-    @GetMapping("/post/category")
+    @GetMapping("/category")
     public Page<PostResponseWithoutTags> searchPostByCategory(@RequestParam("title") String q,
         Pageable pageable) {
         return postService.searchPostsByCategory(q, pageable);
     }
 
-    @GetMapping("/post/recycling")
+    @GetMapping("/recycling")
     public List<PostDeletedResponse> fetchDeletedPost() {
         return postService.fetchDeletedPosts();
     }
 
-    @PostMapping("/post/deletePermanent/{id}")
+    @PostMapping("/deletePermanent/{id}")
     public void deletePermanent(@PathVariable Long id) {
         postService.deletePermanent(id);
     }
 
-    @PostMapping("/post/revertDelete/{id}")
+    @PostMapping("/revertDelete/{id}")
     public void revertDelete(@PathVariable Long id) {
         postService.revertDelete(id);
+    }
+
+    @PostMapping("/{id}/views")
+    public void addViews(@PathVariable Long id) {
+        postService.addViews(id);
     }
 }

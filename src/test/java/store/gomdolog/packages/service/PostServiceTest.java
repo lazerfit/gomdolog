@@ -95,7 +95,7 @@ class PostServiceTest {
     }
 
     @Test
-    void delete() {
+    void deleteTemporary() {
         postRepository.save(Post.builder()
             .title("제목")
             .content("content")
@@ -257,5 +257,22 @@ class PostServiceTest {
         post.revertDelete();
 
         assertThat(post.getIsDeleted()).isFalse();
+    }
+
+    @Test
+    void 조회수_증가() {
+        Category category = categoryRepository.findAll().get(0);
+
+        Post post = postRepository.save(Post.builder()
+            .title("제목")
+            .content("content")
+            .category(postCategoryService.findCategoryByTitle("spring"))
+            .views(0L)
+            .tags(Arrays.asList("spring", "vue.js"))
+            .build());
+
+        post.addViews();
+
+        assertThat(post.getViews()).isEqualTo(1L);
     }
 }
