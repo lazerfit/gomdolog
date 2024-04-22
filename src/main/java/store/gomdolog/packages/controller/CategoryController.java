@@ -20,27 +20,27 @@ import store.gomdolog.packages.service.CategoryService;
 @RestController
 @RequiredArgsConstructor
 @CrossOrigin(maxAge = 3600, origins = "http://localhost:5173")
-@RequestMapping("/api")
+@RequestMapping("/api/category")
 public class CategoryController {
 
     private final CategoryService categoryService;
 
-    @PostMapping("/category/new")
+    @PostMapping("/new")
     public void save(@RequestBody @Valid CategorySaveRequest categorySaveRequest) {
         categoryService.save(categorySaveRequest);
     }
 
-    @GetMapping("/category/all")
+    @GetMapping("/all")
     public List<CategoryResponse> findAll() {
         return categoryService.findAll();
     }
 
-    @PostMapping("/category/delete/{id}")
+    @PostMapping("/delete/{id}")
     public void delete(@PathVariable Long id ) {
         categoryService.delete(id);
     }
 
-    @PostMapping("/category/update")
+    @PostMapping("/update")
     public void update(@RequestBody @Valid CategoryUpdate update) {
         categoryService.update(update);
     }

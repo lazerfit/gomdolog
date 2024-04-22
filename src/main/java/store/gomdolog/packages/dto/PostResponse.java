@@ -12,6 +12,7 @@ public class PostResponse {
     private final String title;
     private final String content;
     private final LocalDateTime createdDate;
+    private final LocalDateTime updatedDate;
     private final String thumbnail;
     private final String categoryTitle;
     private final List<String> tags;
@@ -24,5 +25,6 @@ public class PostResponse {
         thumbnail = post.getThumbnail();
         categoryTitle = post.getCategory().getTitle();
         tags = post.getTags();
+        updatedDate = post.getCreatedDate();
     }
 }

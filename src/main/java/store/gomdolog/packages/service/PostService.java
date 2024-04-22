@@ -27,7 +27,7 @@ public class PostService {
 
     private final PostCategoryService postCategoryService;
 
-    @CacheEvict(value = "{postAllCache, postByCategory}", allEntries = true)
+    @CacheEvict(value = {"postAllCache", "postByCategory"}, allEntries = true)
     @Transactional
     public void save(PostSaveRequest request) {
         Category category = postCategoryService.findCategoryByTitle(request.categoryTitle());
@@ -57,7 +57,7 @@ public class PostService {
         return postRepository.fetchPosts(pageable);
     }
 
-    @CacheEvict(value = "{postAllCache, postByCategory}", allEntries = true)
+    @CacheEvict(value = {"postAllCache", "postByCategory"}, allEntries = true)
     @Transactional
     public void deleteTemporary(Long id) {
         Post post = postRepository.findById(id).orElseThrow();
@@ -69,14 +69,14 @@ public class PostService {
         postRepository.deleteById(id);
     }
 
-    @CacheEvict(value = "{postAllCache, postByCategory}", allEntries = true)
+    @CacheEvict(value = {"postAllCache", "postByCategory"}, allEntries = true)
     @Transactional
     public void revertDelete(Long id) {
         Post post = postRepository.findById(id).orElseThrow();
         post.revertDelete();
     }
 
-    @CacheEvict(value = "{postAllCache, postByCategory}", allEntries = true)
+    @CacheEvict(value = {"postAllCache", "postByCategory"}, allEntries = true)
     @Transactional
     public void update(PostUpdate update) {
         Post post = postRepository.findById(update.id()).orElseThrow();
