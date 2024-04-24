@@ -26,3 +26,7 @@ management:
     web:
       exposure:
         include: caches, metrics
+
+jwt:
+  token:
+    secret: 4rZceoPO8qHVJcMPNJp9fTmKrbwm/6gEOQEf2fEdaUo=

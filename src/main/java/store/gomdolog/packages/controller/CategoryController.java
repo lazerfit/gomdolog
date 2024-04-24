@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,21 +26,25 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/category/new")
     public void save(@RequestBody @Valid CategorySaveRequest categorySaveRequest) {
         categoryService.save(categorySaveRequest);
     }
 
+    @PreAuthorize("permitAll()")
     @GetMapping("/category/all")
     public List<CategoryResponse> findAll() {
         return categoryService.findAll();
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/category/delete/{id}")
     public void delete(@PathVariable Long id ) {
         categoryService.delete(id);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/category/update")
     public void update(@RequestBody @Valid CategoryUpdate update) {
         categoryService.update(update);
