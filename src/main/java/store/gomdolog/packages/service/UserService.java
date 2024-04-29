@@ -36,6 +36,7 @@ public class UserService {
         return new JwtAuthenticationResponse(jwt);
     }
 
+    @Transactional(readOnly = true)
     public JwtAuthenticationResponse signIn(UserSignInRequest request) {
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(request.email(), request.password())
@@ -47,4 +48,16 @@ public class UserService {
         return new JwtAuthenticationResponse(jwt);
     }
 
+    @Transactional(readOnly = true)
+    public String getRole(String jwt) {
+        if (!jwt.startsWith("Bearer ") || jwtService.isTokenExpired(jwt)) {
+            throw new IllegalArgumentException("잘못된 요청입니다.");
+        } else {
+            String token = jwt.substring(7);
+            String username = jwtService.extractUsername(token);
+            User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new IllegalArgumentException("잘못된 요청입니다."));
+            return user.getRole().toString();
+        }
+    }
 }
