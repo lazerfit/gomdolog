@@ -1,6 +1,7 @@
 package store.gomdolog.packages.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +19,7 @@ import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
 import store.gomdolog.packages.dto.PostResponseWithoutTags;
 import store.gomdolog.packages.dto.PostUpdate;
+import store.gomdolog.packages.error.PostNotFound;
 import store.gomdolog.packages.repository.CategoryRepository;
 import store.gomdolog.packages.repository.PostRepository;
 
@@ -274,5 +276,22 @@ class PostServiceTest {
         post.addViews();
 
         assertThat(post.getViews()).isEqualTo(1L);
+    }
+
+    @Test
+    void errorMessage() {
+        Category category = categoryRepository.findAll().get(0);
+
+        Post post = postRepository.save(Post.builder()
+            .title("제목")
+            .content("content")
+            .category(postCategoryService.findCategoryByTitle("spring"))
+            .views(0L)
+            .tags(Arrays.asList("spring", "vue.js"))
+            .build());
+
+        assertThatThrownBy(() -> postRepository.findById(12L).orElseThrow(PostNotFound::new))
+            .hasMessage("해당 post가 존재하지 않습니다.")
+            .isInstanceOf(PostNotFound.class);
     }
 }

@@ -1,6 +1,7 @@
 package store.gomdolog.packages.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
 import store.gomdolog.packages.dto.CategoryUpdate;
+import store.gomdolog.packages.error.CategoryNotFound;
 import store.gomdolog.packages.repository.CategoryRepository;
 import store.gomdolog.packages.repository.PostRepository;
 
@@ -136,5 +138,12 @@ class CategoryServiceTest {
 
         assertThat(update.title()).isEqualTo(category1.getTitle());
 
+    }
+
+    @Test
+    void errorMessage() {
+        assertThatThrownBy(() -> categoryRepository.findById(12L).orElseThrow(CategoryNotFound::new))
+            .hasMessage("Category not found")
+            .isInstanceOf(CategoryNotFound.class);
     }
 }
