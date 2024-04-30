@@ -26,7 +26,7 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PostMapping("/category/new")
     public void save(@RequestBody @Valid CategorySaveRequest categorySaveRequest) {
         categoryService.save(categorySaveRequest);
@@ -38,13 +38,13 @@ public class CategoryController {
         return categoryService.findAll();
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PostMapping("/category/delete/{id}")
     public void delete(@PathVariable Long id ) {
         categoryService.delete(id);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PostMapping("/category/update")
     public void update(@RequestBody @Valid CategoryUpdate update) {
         categoryService.update(update);

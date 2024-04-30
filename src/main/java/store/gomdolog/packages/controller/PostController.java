@@ -31,13 +31,13 @@ public class PostController {
 
     private final PostService postService;
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PostMapping("/new")
     public void save(@RequestBody @Valid PostSaveRequest req) {
         postService.save(req);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PostMapping("/update")
     public void update(@RequestBody @Valid PostUpdate postUpdate) {
         postService.update(postUpdate);
@@ -55,7 +55,7 @@ public class PostController {
         return postService.findAll(pageable);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PostMapping("/delete/{id}")
     public void delete(@PathVariable Long id) {
         log.info("Deleting post with id {}", id);
@@ -82,19 +82,19 @@ public class PostController {
         return postService.searchPostsByCategory(q, pageable);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     @GetMapping("/recycling")
     public List<PostDeletedResponse> fetchDeletedPost() {
         return postService.fetchDeletedPosts();
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PostMapping("/deletePermanent/{id}")
     public void deletePermanent(@PathVariable Long id) {
         postService.deletePermanent(id);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PostMapping("/revertDelete/{id}")
     public void revertDelete(@PathVariable Long id) {
         postService.revertDelete(id);

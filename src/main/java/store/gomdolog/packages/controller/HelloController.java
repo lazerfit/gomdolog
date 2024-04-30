@@ -18,7 +18,7 @@ public class HelloController {
         return jwtService.secretKeyGenerate();
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_USER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     @GetMapping("/api/auth/test")
     public String test() {
         return "HOLA AMIGO!";

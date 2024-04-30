@@ -12,6 +12,7 @@ import store.gomdolog.packages.domain.Post;
 import store.gomdolog.packages.dto.CategoryResponse;
 import store.gomdolog.packages.dto.CategorySaveRequest;
 import store.gomdolog.packages.dto.CategoryUpdate;
+import store.gomdolog.packages.error.CategoryNotFound;
 import store.gomdolog.packages.repository.CategoryRepository;
 
 @Slf4j
@@ -39,7 +40,7 @@ public class CategoryService {
     @CacheEvict(value = "categoryCache", allEntries = true)
     @Transactional
     public void delete(Long id) {
-        Category category = categoryRepository.findById(id).orElseThrow();
+        Category category = categoryRepository.findById(id).orElseThrow(CategoryNotFound::new);
 
         List<Post> postList = postCategoryService.findPostsByCategory(category);
 
@@ -61,7 +62,7 @@ public class CategoryService {
     @CacheEvict(value = "categoryCache", allEntries = true)
     @Transactional
     public void update(CategoryUpdate update) {
-        Category category = categoryRepository.findById(update.id()).orElseThrow();
+        Category category = categoryRepository.findById(update.id()).orElseThrow(CategoryNotFound::new);
         category.update(update);
     }
 }

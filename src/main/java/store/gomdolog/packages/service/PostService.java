@@ -17,6 +17,7 @@ import store.gomdolog.packages.dto.PostResponse;
 import store.gomdolog.packages.dto.PostResponseWithoutTags;
 import store.gomdolog.packages.dto.PostSaveRequest;
 import store.gomdolog.packages.dto.PostUpdate;
+import store.gomdolog.packages.error.PostNotFound;
 import store.gomdolog.packages.repository.PostRepository;
 
 @Service
@@ -47,7 +48,7 @@ public class PostService {
     @Cacheable(value = "postCache", unless = "#result == null", key = "{#id}")
     @Transactional(readOnly = true)
     public PostResponse findById(Long id) {
-        Post post = postRepository.findById(id).orElseThrow();
+        Post post = postRepository.findById(id).orElseThrow(PostNotFound::new);
         return new PostResponse(post);
     }
 
@@ -60,7 +61,7 @@ public class PostService {
     @CacheEvict(value = {"postAllCache", "postByCategory"}, allEntries = true)
     @Transactional
     public void deleteTemporary(Long id) {
-        Post post = postRepository.findById(id).orElseThrow();
+        Post post = postRepository.findById(id).orElseThrow(PostNotFound::new);
         post.moveToRecycleBin();
     }
 

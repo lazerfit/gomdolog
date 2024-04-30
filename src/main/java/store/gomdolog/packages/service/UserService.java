@@ -50,10 +50,10 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public String getRole(String jwt) {
-        if (!jwt.startsWith("Bearer ") || jwtService.isTokenExpired(jwt)) {
+        String token = jwt.substring(7);
+        if (!jwt.startsWith("Bearer ") || jwtService.isTokenExpired(token)) {
             throw new IllegalArgumentException("잘못된 요청입니다.");
         } else {
-            String token = jwt.substring(7);
             String username = jwtService.extractUsername(token);
             User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new IllegalArgumentException("잘못된 요청입니다."));
