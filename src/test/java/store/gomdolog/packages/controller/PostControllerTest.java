@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Category;
@@ -57,6 +58,7 @@ class PostControllerTest {
 
     @Test
     @Transactional
+    @WithMockUser(authorities = "ADMIN")
     void save() throws Exception {
         PostSaveRequest req = PostSaveRequest.builder()
             .title("제목")
@@ -121,6 +123,7 @@ class PostControllerTest {
     }
 
     @Test
+    @WithMockUser(authorities = "ADMIN")
     void delete() throws Exception {
         Category category = new Category("Spring");
         categoryRepository.save(category);
@@ -137,6 +140,7 @@ class PostControllerTest {
     }
 
     @Test
+    @WithMockUser(authorities = "ADMIN")
     void update() throws Exception{
         Post post = postRepository.save(Post.builder()
             .title("제목")
@@ -200,6 +204,7 @@ class PostControllerTest {
     }
 
     @Test
+    @WithMockUser(authorities = "ADMIN")
     void 휴지통() throws Exception {
         Category category = categoryRepository.findAll().get(0);
 
@@ -222,6 +227,7 @@ class PostControllerTest {
     }
 
     @Test
+    @WithMockUser(authorities = "ADMIN")
     void 영구삭제() throws Exception {
         Category category = categoryRepository.findAll().get(0);
 
@@ -245,6 +251,7 @@ class PostControllerTest {
     }
 
     @Test
+    @WithMockUser(authorities = "ADMIN")
     void 휴지통_복원() throws Exception {
         Category category = categoryRepository.findAll().get(0);
 
@@ -290,4 +297,33 @@ class PostControllerTest {
         assertThat(foundPost.getViews()).isEqualTo(1L);
 
     }
+
+    @Test
+    @WithMockUser(authorities = "ADMIN")
+    void adminDashboard() throws Exception {
+        Category category = categoryRepository.findAll().get(0);
+
+        Post post = postRepository.save(Post.builder()
+            .title("제목")
+            .content("content")
+            .category(category)
+            .views(3L)
+            .tags(Arrays.asList("spring", "vue.js"))
+            .build());
+
+        Post post1 = postRepository.save(Post.builder()
+            .title("제목1")
+            .content("content1")
+            .category(category)
+            .views(2L)
+            .tags(Arrays.asList("spring", "vue.js"))
+            .build());
+
+        mockMvc.perform(get("/api/post/popular/top5"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[0].views").value(3L));
+    }
+
 }

@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import store.gomdolog.packages.dto.AdminDashboardPost;
 import store.gomdolog.packages.dto.PostDeletedResponse;
 import store.gomdolog.packages.dto.PostResponse;
 import store.gomdolog.packages.dto.PostResponseWithoutTags;
@@ -25,7 +25,6 @@ import store.gomdolog.packages.service.PostService;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin(maxAge = 3600, origins = "http://localhost:5173")
 @RequestMapping("/api/post")
 public class PostController {
 
@@ -66,6 +65,12 @@ public class PostController {
     @GetMapping("/popular")
     public List<PostResponseWithoutTags> findPopular() {
         return postService.getPopularPosts();
+    }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @GetMapping("/popular/top5")
+    public List<AdminDashboardPost> findPopularTop5() {
+        return postService.getTop5PopularPosts();
     }
 
     @PreAuthorize("permitAll()")

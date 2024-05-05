@@ -294,4 +294,29 @@ class PostServiceTest {
             .hasMessage("해당 post가 존재하지 않습니다.")
             .isInstanceOf(PostNotFound.class);
     }
+
+    @Test
+    void adminDashboardPost() {
+        Category category = categoryRepository.findAll().get(0);
+
+        Post post = postRepository.save(Post.builder()
+            .title("제목")
+            .content("content")
+            .category(postCategoryService.findCategoryByTitle("spring"))
+            .views(3L)
+            .tags(Arrays.asList("spring", "vue.js"))
+            .build());
+
+        Post post1 = postRepository.save(Post.builder()
+            .title("제목1")
+            .content("content1")
+            .category(postCategoryService.findCategoryByTitle("spring"))
+            .views(2L)
+            .tags(Arrays.asList("spring", "vue.js"))
+            .build());
+
+        List<Post> top5PopularPosts = postRepository.getTop5PopularPosts();
+
+        assertThat(top5PopularPosts.get(0).getTitle()).isEqualTo("제목");
+    }
 }

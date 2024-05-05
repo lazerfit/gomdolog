@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.dto.CategorySaveRequest;
@@ -41,6 +42,7 @@ class CategoryControllerTest {
     }
 
     @Test
+    @WithMockUser(authorities = "ADMIN")
     void save() throws Exception {
         CategorySaveRequest request = new CategorySaveRequest("Vue.js");
 
@@ -52,6 +54,7 @@ class CategoryControllerTest {
     }
 
     @Test
+    @WithMockUser(authorities = "ADMIN")
     void findAll() throws Exception {
         for (int i = 0; i < 5; i++) {
             categoryRepository.save(new Category("vue"+i));
@@ -69,6 +72,7 @@ class CategoryControllerTest {
     }
 
     @Test
+    @WithMockUser(authorities = "ADMIN")
     void delete() throws Exception {
         Category category = new Category("Vue.js");
         Category saved = categoryRepository.save(category);
@@ -82,6 +86,7 @@ class CategoryControllerTest {
     }
 
     @Test
+    @WithMockUser(authorities = "ADMIN")
     void update() throws Exception {
         Category category = new Category("Vue.js");
         Category saved = categoryRepository.save(category);

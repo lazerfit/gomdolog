@@ -14,4 +14,7 @@ public interface PostRepository extends PostRepositoryCustom, JpaRepository<Post
 
     @Query("select p from Post p order by p.views desc limit 3")
     List<Post> getPopularPosts();
+
+    @Query("select p from Post p order by p.views desc limit 5")
+    List<Post> getTop5PopularPosts();
 }
