@@ -1,7 +1,32 @@
 spring:
-  profiles:
-    include: real-db, real
+  application:
+    name: gomdolog
+  datasource:
+    url: jdbc:mysql://localhost:3306/gomdolog
+    username: root
+    password: 1111
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
+    open-in-view: true
     hibernate:
-      dialect: org.hibernate.dialect.MySQL8InnoDBDialect
+      ddl-auto: update
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+  sql:
+    init:
+      mode: never
 
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: caches, metrics
+
+jwt:
+  token:
+    secret: 4rZceoPO8qHVJcMPNJp9fTmKrbwm/6gEOQEf2fEdaUo=
