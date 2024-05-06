@@ -38,10 +38,11 @@ jobs:
         # Content of the SSH private key. For example, the raw content of ~/.ssh/id_rsa.
         key: ${{ secrets.REMOTE_SSH_KEY }}
         # Commands to be executed.
+        command_timeout: 5m
+        script_stop: true
         script: |
           cd /home/ubuntu/app
           ./deploy.sh
-          cd /home/ubuntu/gomdolog
           
 
             
