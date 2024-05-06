@@ -1,7 +1,5 @@
 spring:
-  profiles:
-    include: real-db
   jpa:
+    open-in-view: false;
     hibernate:
       dialect: org.hibernate.dialect.MySQL8InnoDBDialect
-
