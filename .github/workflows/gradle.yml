@@ -40,13 +40,8 @@ jobs:
         # Commands to be executed.
         script: |
           cd /home/ubuntu/app
-          git pull
-          ./gradlew build
-          cd /home/ubuntu/app
-          cd /home/ubuntu/app/gomdolog/build/libs/*.jar /home/ubuntu/app/
-          kill -15 pgrep -f gomdolog.*.jar
-          nohup java -jar -Dspring.config.location=classpath:/application.yml,/home/ubuntu/app/application-real.yml,/home/ubuntu/app/application-real-db.yml /home/ubuntu/app/gomdolog-0.0.1-SNAPSHOT.jar 2>&1 &
-          
+          ./deploy.sh
+          nohup java -jar -Dspring.config.location=classpath:/application.yml,/home/ubuntu/app/application-real.yml,/home/ubuntu/app/application-real-db.yml $REPOSITORY/$JAR_NAME 2>&1 &
           
 
             
