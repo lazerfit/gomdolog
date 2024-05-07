@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,6 +26,7 @@ import store.gomdolog.packages.service.PostService;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin(maxAge = 3600, origins = {"https://gomdolog.vercel.app"})
 @RequestMapping("/api/post")
 public class PostController {
 
