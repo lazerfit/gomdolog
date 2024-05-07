@@ -63,7 +63,7 @@ public class SecurityConfig {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {
                 registry.addMapping("/**")
-                    .allowedOrigins("gomdolog.vercel.app")
+                    .allowedOrigins("https://gomdolog.vercel.app")
                     .allowedHeaders(HttpHeaders.AUTHORIZATION, HttpHeaders.CONTENT_TYPE)
                     .allowedMethods(HttpMethod.GET.name(), HttpMethod.POST.name());
             }
