@@ -64,6 +64,7 @@ public class PostController {
     @PreAuthorize("permitAll()")
     @GetMapping("/popular")
     public List<PostResponseWithoutTags> findPopular() {
+        log.info("post popular controller called");
         return postService.getPopularPosts();
     }
 
