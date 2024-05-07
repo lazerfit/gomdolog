@@ -11,6 +11,8 @@ import store.gomdolog.packages.domain.User;
 import store.gomdolog.packages.dto.JwtAuthenticationResponse;
 import store.gomdolog.packages.dto.UserSignInRequest;
 import store.gomdolog.packages.dto.UserSignUpRequest;
+import store.gomdolog.packages.error.AlreadyExistEmail;
+import store.gomdolog.packages.error.UserNotFound;
 import store.gomdolog.packages.repository.UserRepository;
 
 @Service
@@ -24,6 +26,11 @@ public class UserService {
 
     @Transactional
     public JwtAuthenticationResponse signUp(UserSignUpRequest userSignUpRequest) {
+
+        if (userRepository.findByEmail(userSignUpRequest.email()).isPresent()) {
+            throw new AlreadyExistEmail();
+        }
+
         User user = User.builder()
             .email(userSignUpRequest.email())
             .password(passwordEncoder.encode(userSignUpRequest.password()))
@@ -42,7 +49,7 @@ public class UserService {
             new UsernamePasswordAuthenticationToken(request.email(), request.password())
         );
         User user = userRepository.findByEmail(request.email())
-            .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
+            .orElseThrow(UserNotFound::new);
 
         String jwt = jwtService.generateToken(user);
         return new JwtAuthenticationResponse(jwt);
