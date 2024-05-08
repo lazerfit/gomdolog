@@ -57,14 +57,12 @@ public class PostController {
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PostMapping("/delete/{id}")
     public void delete(@PathVariable Long id) {
-        log.info("Deleting post with id {}", id);
         postService.deleteTemporary(id);
     }
 
     @PreAuthorize("permitAll()")
     @GetMapping("/popular")
     public List<PostResponseWithoutTags> findPopular() {
-        log.info("post popular controller called");
         return postService.getPopularPosts();
     }
 
