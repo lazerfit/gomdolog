@@ -3,8 +3,11 @@ package store.gomdolog.packages.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.AfterEach;
@@ -18,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
 import store.gomdolog.packages.dto.PostResponseWithoutTags;
+import store.gomdolog.packages.dto.PostSaveRequest;
 import store.gomdolog.packages.dto.PostUpdate;
 import store.gomdolog.packages.error.PostNotFound;
 import store.gomdolog.packages.repository.CategoryRepository;
@@ -35,11 +39,13 @@ class PostServiceTest {
     @Autowired
     private PostCategoryService postCategoryService;
 
+    @Autowired
+    private PostService postService;
+
     @BeforeEach
     void setUp() {
         Category category = new Category("Spring");
         categoryRepository.save(category);
-
     }
 
     @AfterEach
@@ -49,16 +55,24 @@ class PostServiceTest {
     }
 
     @Test
-    void save() {
-        postRepository.save(Post.builder()
+    @Transactional
+    void save() throws JsonProcessingException {
+        List<String> tagList = new ArrayList<>();
+        tagList.add("Spring");
+        tagList.add("Vue.js");
+
+        Long postId = postService.save(PostSaveRequest.builder()
             .title("제목")
             .content("content")
-            .category(postCategoryService.findCategoryByTitle("spring"))
             .views(0L)
-            .tags(Arrays.asList("spring","vue.js"))
+            .tags(tagList)
+            .categoryTitle("Spring")
             .build());
 
-        assertThat(postRepository.findAll()).hasSize(1);
+        Post savedPost = postRepository.findById(postId).orElseThrow();
+
+        assertThat(savedPost.getPostTags()).hasSize(tagList.size());
+        assertThat(savedPost.getTitle()).isEqualTo("제목");
     }
 
     @Test
@@ -97,41 +111,61 @@ class PostServiceTest {
     }
 
     @Test
+    @Transactional
     void deleteTemporary() {
-        postRepository.save(Post.builder()
-            .title("제목")
+        PostSaveRequest saveRequest = PostSaveRequest.builder()
+            .title("Spring")
             .content("content")
-            .category(postCategoryService.findCategoryByTitle("spring"))
+            .tags(Arrays.asList("modify1", "modify2"))
             .views(0L)
-            .build());
+            .categoryTitle("Spring")
+            .build();
+
+        postService.save(saveRequest);
 
         Post post = postRepository.findAll().get(0);
 
-        postRepository.deleteById(post.getId());
+        postService.deleteTemporary(post.getId());
 
-        assertThat(postRepository.findAll()).isEmpty();
+        assertThat(postRepository.findAll().get(0).getIsDeleted()).isTrue();
     }
 
     @Test
     @Transactional
     void update() {
-        Post post = postRepository.save(Post.builder()
+            List<String> tagList = new ArrayList<>();
+            tagList.add("Spring");
+            tagList.add("Vue.js");
+
+        PostSaveRequest saveRequest = PostSaveRequest.builder()
             .title("제목")
             .content("content")
-            .category(postCategoryService.findCategoryByTitle("spring"))
             .views(0L)
-            .tags(Arrays.asList("spring", "vue.js"))
-            .build());
+            .categoryTitle("Spring")
+            .tags(tagList)
+            .build();
 
-        PostUpdate postUpdate = new PostUpdate(post.getId(), "수정 제목", "수정 본문", "spring",
-            Arrays.asList("spring", "vue.js"));
+        Long savedId = postService.save(saveRequest);
 
-        post.update(postUpdate);
+        Post post = postRepository.findById(savedId).orElseThrow();
+
+        PostUpdate postUpdate = PostUpdate.builder()
+            .id(post.getId())
+            .title("수정 제목")
+            .content("수정 본문")
+            .tags(Arrays.asList("modify1", "modify2"))
+            .categoryTitle("Spring")
+            .build();
+
+        postService.update(postUpdate);
 
         Post updatedPost = postRepository.findById(post.getId()).orElseThrow();
 
+        System.out.println(updatedPost.getPostTags().toArray().length);
+
         assertThat(updatedPost.getTitle()).isEqualTo("수정 제목");
         assertThat(updatedPost.getContent()).isEqualTo("수정 본문");
+        assertThat(updatedPost.getPostTags().get(0).getTag().getName()).isEqualTo("modify1");
     }
 
     @Test
@@ -143,9 +177,8 @@ class PostServiceTest {
         Post post = postRepository.save(Post.builder()
             .title("제목")
             .content("content")
-            .category(postCategoryService.findCategoryByTitle("spring"))
+            .category(postCategoryService.findCategoryByTitle("Spring"))
             .views(0L)
-            .tags(Arrays.asList("spring", "vue.js"))
             .build());
 
         post.updateCategory(category);
@@ -207,9 +240,8 @@ class PostServiceTest {
         Post post = postRepository.save(Post.builder()
             .title("제목")
             .content("content")
-            .category(postCategoryService.findCategoryByTitle("spring"))
+            .category(postCategoryService.findCategoryByTitle("Spring"))
             .views(0L)
-            .tags(Arrays.asList("spring", "vue.js"))
             .build());
 
         post.moveToRecycleBin();
@@ -225,9 +257,8 @@ class PostServiceTest {
         Post post = postRepository.save(Post.builder()
             .title("제목")
             .content("content")
-            .category(postCategoryService.findCategoryByTitle("spring"))
+            .category(postCategoryService.findCategoryByTitle("Spring"))
             .views(0L)
-            .tags(Arrays.asList("spring", "vue.js"))
             .build());
 
         post.moveToRecycleBin();
@@ -247,9 +278,8 @@ class PostServiceTest {
         Post post = postRepository.save(Post.builder()
             .title("제목")
             .content("content")
-            .category(postCategoryService.findCategoryByTitle("spring"))
+            .category(postCategoryService.findCategoryByTitle("Spring"))
             .views(0L)
-            .tags(Arrays.asList("spring", "vue.js"))
             .build());
 
         post.moveToRecycleBin();
@@ -268,9 +298,8 @@ class PostServiceTest {
         Post post = postRepository.save(Post.builder()
             .title("제목")
             .content("content")
-            .category(postCategoryService.findCategoryByTitle("spring"))
+            .category(postCategoryService.findCategoryByTitle("Spring"))
             .views(0L)
-            .tags(Arrays.asList("spring", "vue.js"))
             .build());
 
         post.addViews();
@@ -285,12 +314,13 @@ class PostServiceTest {
         Post post = postRepository.save(Post.builder()
             .title("제목")
             .content("content")
-            .category(postCategoryService.findCategoryByTitle("spring"))
+            .category(postCategoryService.findCategoryByTitle("Spring"))
             .views(0L)
-            .tags(Arrays.asList("spring", "vue.js"))
             .build());
 
-        assertThatThrownBy(() -> postRepository.findById(12L).orElseThrow(PostNotFound::new))
+        Optional<Post> post1 = postRepository.findById(13L);
+
+        assertThatThrownBy(() -> post1.orElseThrow(PostNotFound::new))
             .hasMessage("해당 post가 존재하지 않습니다.")
             .isInstanceOf(PostNotFound.class);
     }
@@ -302,17 +332,15 @@ class PostServiceTest {
         Post post = postRepository.save(Post.builder()
             .title("제목")
             .content("content")
-            .category(postCategoryService.findCategoryByTitle("spring"))
+            .category(postCategoryService.findCategoryByTitle("Spring"))
             .views(3L)
-            .tags(Arrays.asList("spring", "vue.js"))
             .build());
 
         Post post1 = postRepository.save(Post.builder()
             .title("제목1")
             .content("content1")
-            .category(postCategoryService.findCategoryByTitle("spring"))
+            .category(postCategoryService.findCategoryByTitle("Spring"))
             .views(2L)
-            .tags(Arrays.asList("spring", "vue.js"))
             .build());
 
         List<Post> top5PopularPosts = postRepository.getTop5PopularPosts();

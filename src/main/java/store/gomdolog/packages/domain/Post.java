@@ -1,8 +1,6 @@
 package store.gomdolog.packages.domain;
 
-import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
@@ -11,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,10 +51,8 @@ public class Post {
     @Column(length = 500)
     private String thumbnail;
 
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "TAG_LIST")
-    @Column(name = "tag")
-    private List<String> tags = new ArrayList<>();
+    @OneToMany(mappedBy = "post")
+    private List<PostTag> postTags = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CATEGORY_ID")
@@ -65,12 +62,11 @@ public class Post {
     private Boolean isDeleted;
 
     @Builder
-    public Post(String title, String content, Long views, String thumbnail, List<String> tags, Category category) {
+    public Post(String title, String content, Long views, String thumbnail,  Category category) {
         this.title = title;
         this.content = content;
         this.views = views;
         this.thumbnail = thumbnail;
-        this.tags = tags;
         this.category = category;
         isDeleted = false;
     }
@@ -82,7 +78,6 @@ public class Post {
     public void update(PostUpdate update) {
         title = update.title();
         content = update.content();
-        tags = update.tags();
     }
 
     public void moveToRecycleBin() {

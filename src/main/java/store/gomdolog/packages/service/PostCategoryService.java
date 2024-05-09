@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
+import store.gomdolog.packages.error.CategoryNotFound;
 import store.gomdolog.packages.repository.CategoryRepository;
 import store.gomdolog.packages.repository.PostRepository;
 
@@ -18,7 +19,7 @@ public class PostCategoryService {
 
     @Transactional(readOnly = true)
     public Category findCategoryByTitle(String title) {
-        return categoryRepository.findByTitle(title);
+        return categoryRepository.findByTitle(title).orElseThrow(CategoryNotFound::new);
     }
 
     @Transactional(readOnly = true)
