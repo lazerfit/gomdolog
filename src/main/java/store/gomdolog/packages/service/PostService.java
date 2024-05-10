@@ -28,8 +28,8 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final PostCategoryService postCategoryService;
-    private final PostTagService postTagService;
     private final TagService tagService;
+    private final PostTagService postTagService;
 
     @CacheEvict(value = {"postAllCache", "postByCategory"}, allEntries = true)
     @Transactional
@@ -75,6 +75,8 @@ public class PostService {
     @Transactional
     public void deletePermanent(Long id) {
         postRepository.deleteById(id);
+        postTagService.delete(id);
+
     }
 
     @CacheEvict(value = {"postAllCache", "postByCategory"}, allEntries = true)
@@ -95,6 +97,10 @@ public class PostService {
                 update.categoryTitle());
             post.updateCategory(category);
         }
+
+        postTagService.delete(post.getId());
+        List<Tag> tagList = tagService.save(update.tags());
+        postTagService.save(post, tagList);
     }
 
     @Transactional(readOnly = true)
