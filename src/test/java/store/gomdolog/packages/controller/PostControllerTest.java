@@ -25,9 +25,9 @@ import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
 import store.gomdolog.packages.dto.PostSaveRequest;
 import store.gomdolog.packages.dto.PostUpdate;
-import store.gomdolog.packages.error.CategoryNotFound;
 import store.gomdolog.packages.repository.CategoryRepository;
 import store.gomdolog.packages.repository.PostRepository;
+import store.gomdolog.packages.service.PostService;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -44,6 +44,9 @@ class PostControllerTest {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private PostService postService;
 
     @BeforeEach
     void setUp() {
@@ -84,18 +87,19 @@ class PostControllerTest {
     }
 
     @Test
+    @Transactional
+    @WithMockUser(authorities = "ADMIN")
     void findById()throws Exception {
-        Category category = categoryRepository.findAll().get(0);
-
-        Post post = postRepository.save(Post.builder()
+        PostSaveRequest req = PostSaveRequest.builder()
             .title("제목")
             .content("내용")
-            .views(0L)
-            .thumbnail("Default Thumbnail")
-            .category(category)
-            .build());
+            .categoryTitle("vue.js")
+            .tags(Arrays.asList("spring","vue.js"))
+            .build();
 
-        mockMvc.perform(get("/api/post/"+post.getId()))
+        Long postId = postService.save(req);
+
+        mockMvc.perform(get("/api/post/"+postId))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.title").value("제목"))
@@ -124,7 +128,7 @@ class PostControllerTest {
 
     @Test
     @WithMockUser(authorities = "ADMIN")
-    void delete() throws Exception {
+    void deleteTemporary() throws Exception {
         Category category = new Category("Spring");
         categoryRepository.save(category);
         Post saved = postRepository.save(Post.builder()
@@ -139,17 +143,20 @@ class PostControllerTest {
             .andExpect(status().isOk());
     }
 
+    @Transactional
     @Test
     @WithMockUser(authorities = "ADMIN")
     void update() throws Exception{
-        Post post = postRepository.save(Post.builder()
+        PostSaveRequest req = PostSaveRequest.builder()
             .title("제목")
-            .content("content")
-            .category(categoryRepository.findByTitle("vue.js").orElseThrow(CategoryNotFound::new))
-            .views(0L)
-            .build());
+            .content("내용")
+            .categoryTitle("vue.js")
+            .tags(Arrays.asList("spring","vue.js"))
+            .build();
 
-        PostUpdate postUpdate = new PostUpdate(post.getId(), "수정 제목", "수정 본문", "spring",
+        Long postId = postService.save(req);
+
+        PostUpdate postUpdate = new PostUpdate(postId, "수정 제목", "수정 본문", "vue.js",
             Arrays.asList("spring", "vue.js"));
 
         mockMvc.perform(post("/api/post/update")
