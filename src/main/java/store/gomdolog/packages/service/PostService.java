@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
+import store.gomdolog.packages.domain.Tag;
 import store.gomdolog.packages.dto.AdminDashboardPost;
 import store.gomdolog.packages.dto.PostDeletedResponse;
 import store.gomdolog.packages.dto.PostResponse;
@@ -26,12 +27,13 @@ import store.gomdolog.packages.repository.PostRepository;
 public class PostService {
 
     private final PostRepository postRepository;
-
     private final PostCategoryService postCategoryService;
+    private final PostTagService postTagService;
+    private final TagService tagService;
 
     @CacheEvict(value = {"postAllCache", "postByCategory"}, allEntries = true)
     @Transactional
-    public void save(PostSaveRequest request) {
+    public Long save(PostSaveRequest request) {
         Category category = postCategoryService.findCategoryByTitle(request.categoryTitle());
 
         Post post = Post.builder()
@@ -40,10 +42,14 @@ public class PostService {
             .views(0L)
             .thumbnail(extractThumbnail(request.content()))
             .category(category)
-            .tags(request.tags())
             .build();
 
-        postRepository.save(post);
+        Post savedPost = postRepository.save(post);
+        List<Tag> tagList = tagService.save(request.tags());
+
+        postTagService.save(post, tagList);
+
+        return savedPost.getId();
     }
 
     @Cacheable(value = "postCache", unless = "#result == null", key = "{#id}")
