@@ -56,7 +56,7 @@ public class PostController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PostMapping("/delete/{id}")
-    public void delete(@PathVariable Long id) {
+    public void deleteTemporary(@PathVariable Long id) {
         postService.deleteTemporary(id);
     }
 

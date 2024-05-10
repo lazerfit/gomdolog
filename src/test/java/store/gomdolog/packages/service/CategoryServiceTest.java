@@ -110,7 +110,7 @@ class CategoryServiceTest {
 
         List<Post> postList = postCategoryService.findPostsByCategory(category);
 
-        if (!isDefaultCategoryExist()) {
+        if (categoryRepository.findByTitle("없음").isEmpty()) {
             Category defaultCategory = categoryRepository.save(new Category("없음"));
             postList.forEach(post -> post.updateCategory(defaultCategory));
         } else {
@@ -121,10 +121,6 @@ class CategoryServiceTest {
         categoryRepository.deleteById(category.getId());
 
         assertThat(categoryRepository.findAll()).hasSize(1);
-    }
-
-    private boolean isDefaultCategoryExist() {
-        return categoryRepository.findByTitle("없음") != null;
     }
 
     @Test
