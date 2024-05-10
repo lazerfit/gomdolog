@@ -48,7 +48,7 @@ public class CategoryService {
             Category defaultCategory = categoryRepository.save(new Category("없음"));
             postList.forEach(post -> post.updateCategory(defaultCategory));
         } else {
-            Category defaultCategory = categoryRepository.findByTitle("없음");
+            Category defaultCategory = categoryRepository.findByTitle("없음").orElseThrow(CategoryNotFound::new);
             postList.forEach(post -> post.updateCategory(defaultCategory));
         }
 
@@ -56,7 +56,7 @@ public class CategoryService {
     }
 
     private boolean isDefaultCategoryExist() {
-        return categoryRepository.findByTitle("없음") != null;
+        return categoryRepository.findByTitle("없음").isPresent();
     }
 
     @CacheEvict(value = "categoryCache", allEntries = true)

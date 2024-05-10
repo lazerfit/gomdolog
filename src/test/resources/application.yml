@@ -7,3 +7,8 @@ spring:
 jwt:
   token:
     secret: 4rZceoPO8qHVJcMPNJp9fTmKrbwm/6gEOQEf2fEdaUo=
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

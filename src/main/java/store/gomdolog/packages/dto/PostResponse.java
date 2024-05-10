@@ -24,7 +24,7 @@ public class PostResponse {
         createdDate = post.getCreatedDate();
         thumbnail = post.getThumbnail();
         categoryTitle = post.getCategory().getTitle();
-        tags = post.getTags();
+        tags = post.getPostTags().stream().map(postTag -> postTag.getTag().getName()).toList();
         updatedDate = post.getCreatedDate();
     }
 }

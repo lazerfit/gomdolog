@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,7 +114,7 @@ class CategoryServiceTest {
             Category defaultCategory = categoryRepository.save(new Category("없음"));
             postList.forEach(post -> post.updateCategory(defaultCategory));
         } else {
-            Category defaultCategory = categoryRepository.findByTitle("없음");
+            Category defaultCategory = categoryRepository.findByTitle("없음").orElseThrow(CategoryNotFound::new);
             postList.forEach(post -> post.updateCategory(defaultCategory));
         }
 
@@ -140,9 +141,12 @@ class CategoryServiceTest {
 
     }
 
+
+
     @Test
     void errorMessage() {
-        assertThatThrownBy(() -> categoryRepository.findById(12L).orElseThrow(CategoryNotFound::new))
+        Optional<Category> categoryOptional= categoryRepository.findById(12L);
+        assertThatThrownBy(() -> categoryOptional.orElseThrow(CategoryNotFound::new))
             .hasMessage("Category not found")
             .isInstanceOf(CategoryNotFound.class);
     }

@@ -5,28 +5,29 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import store.gomdolog.packages.dto.CategoryUpdate;
 
-@Entity
 @Getter
 @NoArgsConstructor
-public class Category {
+@Entity
+public class Tag {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "CATEGORY_ID")
+    @Column(name = "TAG_ID")
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 50)
-    private String title;
+    @Column(unique = true, nullable = false)
+    private String name;
 
-    public Category(String title) {
-        this.title = title;
-    }
+    @OneToMany(mappedBy = "tag")
+    private List<PostTag> postTags = new ArrayList<>();
 
-    public void update(CategoryUpdate update) {
-        this.title = update.title();
+    public Tag(String name) {
+        this.name = name;
     }
 }

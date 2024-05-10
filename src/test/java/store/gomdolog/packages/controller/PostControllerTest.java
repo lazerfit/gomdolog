@@ -25,6 +25,7 @@ import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
 import store.gomdolog.packages.dto.PostSaveRequest;
 import store.gomdolog.packages.dto.PostUpdate;
+import store.gomdolog.packages.error.CategoryNotFound;
 import store.gomdolog.packages.repository.CategoryRepository;
 import store.gomdolog.packages.repository.PostRepository;
 
@@ -92,7 +93,6 @@ class PostControllerTest {
             .views(0L)
             .thumbnail("Default Thumbnail")
             .category(category)
-            .tags(Arrays.asList("spring","vue.js"))
             .build());
 
         mockMvc.perform(get("/api/post/"+post.getId()))
@@ -145,9 +145,8 @@ class PostControllerTest {
         Post post = postRepository.save(Post.builder()
             .title("제목")
             .content("content")
-            .category(categoryRepository.findByTitle("vue.js"))
+            .category(categoryRepository.findByTitle("vue.js").orElseThrow(CategoryNotFound::new))
             .views(0L)
-            .tags(Arrays.asList("spring", "vue.js"))
             .build());
 
         PostUpdate postUpdate = new PostUpdate(post.getId(), "수정 제목", "수정 본문", "spring",
@@ -213,7 +212,6 @@ class PostControllerTest {
             .content("content")
             .category(category)
             .views(0L)
-            .tags(Arrays.asList("spring", "vue.js"))
             .build());
 
         mockMvc.perform(post("/api/post/delete/" + post.getId()))
@@ -236,7 +234,6 @@ class PostControllerTest {
             .content("content")
             .category(category)
             .views(0L)
-            .tags(Arrays.asList("spring", "vue.js"))
             .build());
 
         mockMvc.perform(post("/api/post/delete/" + post.getId()))
@@ -260,7 +257,6 @@ class PostControllerTest {
             .content("content")
             .category(category)
             .views(0L)
-            .tags(Arrays.asList("spring", "vue.js"))
             .build());
 
         mockMvc.perform(post("/api/post/delete/" + post.getId()))
@@ -285,7 +281,6 @@ class PostControllerTest {
             .content("content")
             .category(category)
             .views(0L)
-            .tags(Arrays.asList("spring", "vue.js"))
             .build());
 
         mockMvc.perform(post("/api/post/"+post.getId()+"/views"))
@@ -308,7 +303,6 @@ class PostControllerTest {
             .content("content")
             .category(category)
             .views(3L)
-            .tags(Arrays.asList("spring", "vue.js"))
             .build());
 
         Post post1 = postRepository.save(Post.builder()
@@ -316,7 +310,6 @@ class PostControllerTest {
             .content("content1")
             .category(category)
             .views(2L)
-            .tags(Arrays.asList("spring", "vue.js"))
             .build());
 
         mockMvc.perform(get("/api/post/popular/top5"))
