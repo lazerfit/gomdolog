@@ -13,10 +13,10 @@ public interface PostRepository extends PostRepositoryCustom, JpaRepository<Post
 
     List<Post> findAllByCategory(Category category);
 
-    @Query("select p from Post p order by p.views desc limit 3")
+    @Query("select p from Post p where p.isDeleted = false order by p.views desc limit 3")
     List<Post> getPopularPosts();
 
-    @Query("select p from Post p order by p.views desc limit 5")
+    @Query("select p from Post p where p.isDeleted = false order by p.views desc limit 5")
     List<Post> getTop5PopularPosts();
 
     @Query("select p from Post p where p.isDeleted = false and p.id = :id")
