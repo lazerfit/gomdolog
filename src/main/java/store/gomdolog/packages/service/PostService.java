@@ -74,9 +74,8 @@ public class PostService {
 
     @Transactional
     public void deletePermanent(Long id) {
-        postRepository.deleteById(id);
         postTagService.delete(id);
-
+        postRepository.deleteById(id);
     }
 
     @CacheEvict(value = {"postAllCache", "postByCategory"}, allEntries = true)
