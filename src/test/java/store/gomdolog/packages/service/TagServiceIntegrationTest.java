@@ -9,11 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import store.gomdolog.packages.domain.Tag;
-import store.gomdolog.packages.dto.PostSaveRequest;
 import store.gomdolog.packages.repository.TagRepository;
 
 @SpringBootTest
-class TagServiceTest {
+class TagServiceIntegrationTest {
 
     @Autowired
     private TagRepository tagRepository;
@@ -30,7 +29,7 @@ class TagServiceTest {
     void save() {
         Tag t = new Tag("Spring");
 
-        Tag savedT = tagRepository.save(t);
+        tagService.save(List.of("Spring"));
 
         assertThat(tagRepository.findAll().get(0).getName()).isEqualTo(t.getName());
     }
@@ -40,13 +39,6 @@ class TagServiceTest {
         List<String> tagList = new ArrayList<>();
         tagList.add("Spring");
         tagList.add("Hibernate");
-
-        PostSaveRequest saveRequest = PostSaveRequest.builder()
-            .title("Spring")
-            .views(0L)
-            .content("content")
-            .tags(tagList)
-            .build();
 
         List<Tag> savedTagList = tagService.save(tagList);
 
@@ -60,13 +52,6 @@ class TagServiceTest {
         List<String> tagList = new ArrayList<>();
         tagList.add("Spring");
         tagList.add("Hibernate");
-
-        PostSaveRequest saveRequest = PostSaveRequest.builder()
-            .title("Spring")
-            .views(0L)
-            .content("content")
-            .tags(tagList)
-            .build();
 
         List<Tag> savedTagList = tagService.save(tagList);
 

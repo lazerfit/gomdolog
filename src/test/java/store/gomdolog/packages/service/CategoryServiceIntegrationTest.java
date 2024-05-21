@@ -18,7 +18,7 @@ import store.gomdolog.packages.repository.CategoryRepository;
 import store.gomdolog.packages.repository.PostRepository;
 
 @SpringBootTest
-class CategoryServiceTest {
+class CategoryServiceIntegrationTest {
 
     @Autowired
     private CategoryRepository categoryRepository;
@@ -28,9 +28,6 @@ class CategoryServiceTest {
 
     @Autowired
     private PostCategoryService postCategoryService;
-
-    @Autowired
-    private CategoryService categoryService;
 
     @AfterEach
     void tearDown() {

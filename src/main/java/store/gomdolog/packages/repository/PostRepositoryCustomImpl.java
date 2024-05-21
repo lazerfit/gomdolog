@@ -30,6 +30,7 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
             ))
             .from(post)
             .where(post.title.like("%" + q + "%"))
+            .where(post.isDeleted.isFalse())
             .orderBy(post.createdDate.desc())
             .limit(pageable.getPageSize())
             .fetch();
@@ -72,6 +73,7 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
             ))
             .from(post)
             .where(post.category.title.eq(q))
+            .where(post.isDeleted.isFalse())
             .orderBy(post.createdDate.desc())
             .limit(pageable.getPageSize())
             .fetch();

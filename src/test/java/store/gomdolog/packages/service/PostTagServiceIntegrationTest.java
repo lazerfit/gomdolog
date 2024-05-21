@@ -14,7 +14,7 @@ import store.gomdolog.packages.dto.PostSaveRequest;
 import store.gomdolog.packages.repository.PostRepository;
 
 @SpringBootTest
-class PostTagServiceTest {
+class PostTagServiceIntegrationTest {
 
     @Autowired
     private PostTagService postTagService;

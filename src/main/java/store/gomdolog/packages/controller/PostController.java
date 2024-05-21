@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import store.gomdolog.packages.dto.AdminDashboardPost;
 import store.gomdolog.packages.dto.PostDeletedResponse;
@@ -32,6 +34,7 @@ public class PostController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PostMapping("/new")
+    @ResponseStatus(HttpStatus.CREATED)
     public void save(@RequestBody @Valid PostSaveRequest req) {
         postService.save(req);
     }
@@ -56,8 +59,23 @@ public class PostController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PostMapping("/delete/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTemporary(@PathVariable Long id) {
         postService.deleteTemporary(id);
+    }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PostMapping("/deletePermanent/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePermanent(@PathVariable Long id) {
+        postService.deletePermanent(id);
+    }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PostMapping("/revertDelete/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void revertDelete(@PathVariable Long id) {
+        postService.revertDelete(id);
     }
 
     @PreAuthorize("permitAll()")
@@ -92,17 +110,7 @@ public class PostController {
         return postService.fetchDeletedPosts();
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
-    @PostMapping("/deletePermanent/{id}")
-    public void deletePermanent(@PathVariable Long id) {
-        postService.deletePermanent(id);
-    }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
-    @PostMapping("/revertDelete/{id}")
-    public void revertDelete(@PathVariable Long id) {
-        postService.revertDelete(id);
-    }
 
     @PreAuthorize("permitAll()")
     @PostMapping("/{id}/views")

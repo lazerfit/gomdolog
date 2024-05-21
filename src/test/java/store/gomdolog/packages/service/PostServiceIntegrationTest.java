@@ -3,7 +3,6 @@ package store.gomdolog.packages.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,7 +27,7 @@ import store.gomdolog.packages.repository.CategoryRepository;
 import store.gomdolog.packages.repository.PostRepository;
 
 @SpringBootTest
-class PostServiceTest {
+class PostServiceIntegrationTest {
 
     @Autowired
     private PostRepository postRepository;
@@ -56,7 +55,7 @@ class PostServiceTest {
 
     @Test
     @Transactional
-    void save() throws JsonProcessingException {
+    void save() {
         List<String> tagList = new ArrayList<>();
         tagList.add("Spring");
         tagList.add("Vue.js");
