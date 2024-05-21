@@ -18,6 +18,7 @@ import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
 import store.gomdolog.packages.dto.PostDeletedResponse;
 import store.gomdolog.packages.dto.PostResponseWithoutTags;
+import store.gomdolog.packages.dto.PostUpdate;
 import store.gomdolog.packages.error.PostNotFound;
 
 @DataJpaTest
@@ -30,6 +31,9 @@ class PostRepositoryTest {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private PostTagRepository postTagRepository;
 
     @Test
     void select1() {
@@ -143,5 +147,37 @@ class PostRepositoryTest {
 
         assertThatThrownBy(() -> post.orElseThrow(PostNotFound::new))
             .isInstanceOf(PostNotFound.class);
+    }
+
+    @Test
+    void delete1() {
+        postTagRepository.deleteByPostId(1L);
+        postRepository.deleteById(1L);
+
+        List<Post> posts = postRepository.findAll();
+        assertThat(posts).hasSize(2);
+    }
+
+    @Test
+    void update1() {
+        Post post = postRepository.findById(1L).orElseThrow(PostNotFound::new);
+
+        post.moveToRecycleBin();
+
+        Post updatedPost = postRepository.findById(1L).orElseThrow(PostNotFound::new);
+        assertThat(updatedPost.getIsDeleted()).isTrue();
+    }
+
+    @Test
+    void update2() {
+        Post post = postRepository.findById(1L).orElseThrow(PostNotFound::new);
+
+        PostUpdate postUpdate = PostUpdate.builder().title("수정_제목").content("수정_본문").build();
+
+        post.update(postUpdate);
+
+        Post updatedPost = postRepository.findById(1L).orElseThrow(PostNotFound::new);
+        assertThat(updatedPost.getTitle()).isEqualTo("수정_제목");
+        assertThat(updatedPost.getContent()).isEqualTo("수정_본문");
     }
 }
