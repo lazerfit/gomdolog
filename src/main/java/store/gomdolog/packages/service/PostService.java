@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -22,6 +23,7 @@ import store.gomdolog.packages.dto.PostUpdate;
 import store.gomdolog.packages.error.PostNotFound;
 import store.gomdolog.packages.repository.PostRepository;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PostService {
@@ -45,9 +47,10 @@ public class PostService {
             .build();
 
         Post savedPost = postRepository.save(post);
-        List<Tag> tagList = tagService.save(request.tags());
-
-        postTagService.save(post, tagList);
+        if (!request.tags().isEmpty()) {
+            List<Tag> tagList = tagService.save(request.tags());
+            postTagService.save(post, tagList);
+        }
 
         return savedPost.getId();
     }
@@ -85,7 +88,7 @@ public class PostService {
         post.revertDelete();
     }
 
-    @CacheEvict(value = {"postAllCache", "postByCategory"}, allEntries = true)
+    @CacheEvict(value = {"postAllCache", "postByCategory", "postCache"}, allEntries = true)
     @Transactional
     public void update(PostUpdate update) {
         Post post = postRepository.findById(update.id()).orElseThrow();

@@ -31,6 +31,7 @@ import store.gomdolog.packages.service.PostService;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class PostControllerTest {
 
     @Autowired
@@ -61,7 +62,6 @@ class PostControllerTest {
     }
 
     @Test
-    @Transactional
     @WithMockUser(authorities = "ADMIN")
     void save() throws Exception {
         PostSaveRequest req = PostSaveRequest.builder()
@@ -75,7 +75,7 @@ class PostControllerTest {
             .content(objectMapper.writeValueAsString(req))
             .contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
-            .andExpect(status().isOk());
+            .andExpect(status().isCreated());
 
         Post post = postRepository.findAll().get(0);
 
@@ -87,7 +87,6 @@ class PostControllerTest {
     }
 
     @Test
-    @Transactional
     @WithMockUser(authorities = "ADMIN")
     void findById()throws Exception {
         PostSaveRequest req = PostSaveRequest.builder()
@@ -140,10 +139,9 @@ class PostControllerTest {
 
         mockMvc.perform(post("/api/post/delete/"+saved.getId()))
             .andDo(print())
-            .andExpect(status().isOk());
+            .andExpect(status().isNoContent());
     }
 
-    @Transactional
     @Test
     @WithMockUser(authorities = "ADMIN")
     void update() throws Exception{
@@ -223,7 +221,7 @@ class PostControllerTest {
 
         mockMvc.perform(post("/api/post/delete/" + post.getId()))
             .andDo(print())
-            .andExpect(status().isOk());
+            .andExpect(status().isNoContent());
 
         mockMvc.perform(get("/api/post/recycling"))
             .andDo(print())
@@ -245,11 +243,11 @@ class PostControllerTest {
 
         mockMvc.perform(post("/api/post/delete/" + post.getId()))
             .andDo(print())
-            .andExpect(status().isOk());
+            .andExpect(status().isNoContent());
 
         mockMvc.perform(post("/api/post/deletePermanent/"+post.getId()))
             .andDo(print())
-            .andExpect(status().isOk());
+            .andExpect(status().isNoContent());
 
         assertThat(postRepository.findAll()).isEmpty();
     }
@@ -268,13 +266,13 @@ class PostControllerTest {
 
         mockMvc.perform(post("/api/post/delete/" + post.getId()))
             .andDo(print())
-            .andExpect(status().isOk());
+            .andExpect(status().isNoContent());
 
         assertThat(postRepository.findById(post.getId()).orElseThrow().getIsDeleted()).isTrue();
 
         mockMvc.perform(post("/api/post/revertDelete/" + post.getId()))
             .andDo(print())
-            .andExpect(status().isOk());
+            .andExpect(status().isNoContent());
 
         assertThat(postRepository.findById(post.getId()).orElseThrow().getIsDeleted()).isFalse();
     }

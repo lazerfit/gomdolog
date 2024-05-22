@@ -18,7 +18,7 @@ import store.gomdolog.packages.repository.CategoryRepository;
 import store.gomdolog.packages.repository.PostRepository;
 
 @SpringBootTest
-class CategoryServiceTest {
+class CategoryServiceIntegrationTest {
 
     @Autowired
     private CategoryRepository categoryRepository;
@@ -28,9 +28,6 @@ class CategoryServiceTest {
 
     @Autowired
     private PostCategoryService postCategoryService;
-
-    @Autowired
-    private CategoryService categoryService;
 
     @AfterEach
     void tearDown() {
@@ -119,7 +116,6 @@ class CategoryServiceTest {
         }
 
         categoryRepository.deleteById(category.getId());
-
         assertThat(categoryRepository.findAll()).hasSize(1);
     }
 
@@ -136,8 +132,6 @@ class CategoryServiceTest {
         assertThat(update.title()).isEqualTo(category1.getTitle());
 
     }
-
-
 
     @Test
     void errorMessage() {
