@@ -1,65 +1,50 @@
 package store.gomdolog.packages.service;
 
-import java.util.ArrayList;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import jakarta.transaction.Transactional;
 import java.util.List;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import store.gomdolog.packages.domain.Post;
 import store.gomdolog.packages.domain.Tag;
-import store.gomdolog.packages.dto.CategorySaveRequest;
-import store.gomdolog.packages.dto.PostSaveRequest;
 import store.gomdolog.packages.repository.PostRepository;
+import store.gomdolog.packages.repository.TagRepository;
 
 @SpringBootTest
+@Sql(scripts = "/PostTagServiceIntegrationTest.sql", executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
+@Transactional
 class PostTagServiceIntegrationTest {
+
+    @Autowired
+    private PostRepository postRepository;
+
+    @Autowired
+    private TagRepository tagRepository;
 
     @Autowired
     private PostTagService postTagService;
 
-    @Autowired
-    private PostService postService;
+    @Test
+    void test1() {
+        Post post = postRepository.findById(3L).orElseThrow(null);
+        Tag tag = tagRepository.findById(1L).orElseThrow(null);
 
-    @Autowired
-    private TagService tagService;
+        postTagService.save(post, List.of(tag));
 
-    @Autowired
-    private CategoryService categoryService;
+        Post savedPost = postRepository.findById(3L).orElseThrow(null);
 
-    @Autowired
-    public PostRepository postRepository;
+        assertThat(savedPost.getPostTags().get(0).getTag()).isEqualTo(tag);
+    }
 
     @Test
-    @Transactional
-    void test1() {
-        List<String> tags = new ArrayList<>();
+    void test2() {
+        postTagService.delete(2L);
 
-        tags.add("tag1");
-        tags.add("tag2");
-
-        categoryService.save(new CategorySaveRequest("test"));
-
-        PostSaveRequest saveRequest = PostSaveRequest.builder()
-            .title("제목")
-            .content("내용")
-            .categoryTitle("test")
-            .tags(tags)
-            .build();
-
-        Long postId = postService.save(saveRequest);
-
-        Post post = postRepository.findById(postId).orElseThrow(RuntimeException::new);
-        List<Tag> tagList = tagService.save(tags);
-
-        postTagService.save(post, tagList);
-
-        Assertions.assertThat(
-                postRepository.findAll().get(0).getPostTags().get(0).getTag().getName())
-            .isEqualTo("tag1");
-        Assertions.assertThat(
-                postRepository.findAll().get(0).getPostTags().get(1).getTag().getName())
-            .isEqualTo("tag2");
+        Post post = postRepository.findById(2L).orElseThrow(null);
+        assertThat(post.getPostTags()).isEmpty();
     }
 }

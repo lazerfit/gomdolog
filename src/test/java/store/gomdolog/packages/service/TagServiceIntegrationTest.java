@@ -2,9 +2,9 @@ package store.gomdolog.packages.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,6 +12,7 @@ import store.gomdolog.packages.domain.Tag;
 import store.gomdolog.packages.repository.TagRepository;
 
 @SpringBootTest
+@Transactional
 class TagServiceIntegrationTest {
 
     @Autowired
@@ -19,11 +20,6 @@ class TagServiceIntegrationTest {
 
     @Autowired
     private TagService tagService;
-
-    @AfterEach
-    void tearDown() {
-        tagRepository.deleteAll();
-    }
 
     @Test
     void save() {

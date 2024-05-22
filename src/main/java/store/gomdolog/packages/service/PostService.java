@@ -47,9 +47,10 @@ public class PostService {
             .build();
 
         Post savedPost = postRepository.save(post);
-        List<Tag> tagList = tagService.save(request.tags());
-
-        postTagService.save(post, tagList);
+        if (!request.tags().isEmpty()) {
+            List<Tag> tagList = tagService.save(request.tags());
+            postTagService.save(post, tagList);
+        }
 
         return savedPost.getId();
     }

@@ -116,7 +116,6 @@ class CategoryServiceIntegrationTest {
         }
 
         categoryRepository.deleteById(category.getId());
-
         assertThat(categoryRepository.findAll()).hasSize(1);
     }
 
@@ -133,8 +132,6 @@ class CategoryServiceIntegrationTest {
         assertThat(update.title()).isEqualTo(category1.getTitle());
 
     }
-
-
 
     @Test
     void errorMessage() {

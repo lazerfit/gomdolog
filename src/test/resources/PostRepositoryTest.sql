@@ -1,4 +1,4 @@
-INSERT INTO category (category_id, title) values ( 1, 'spring' ),( 2, 'css' );
+INSERT INTO category (category_id, title) values ( 1, 'spring' ),( 2, 'css' ),(3,'Spring');
 INSERT INTO post (category_id, created_date, modified_date, post_id, views, thumbnail, title, content, is_deleted) values
 (1,CURRENT_TIMESTAMP(),CURRENT_TIMESTAMP() , 1, 0, 'Default Thumbnail', '제목', '<p>내용</p>', false  ),
 (2,CURRENT_TIMESTAMP(),CURRENT_TIMESTAMP() , 2, 1, 'Default Thumbnail', '제목2', '<p>내용2</p>', false  ),

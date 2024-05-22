@@ -31,6 +31,7 @@ import store.gomdolog.packages.service.PostService;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class PostControllerTest {
 
     @Autowired
@@ -61,7 +62,6 @@ class PostControllerTest {
     }
 
     @Test
-    @Transactional
     @WithMockUser(authorities = "ADMIN")
     void save() throws Exception {
         PostSaveRequest req = PostSaveRequest.builder()
@@ -87,7 +87,6 @@ class PostControllerTest {
     }
 
     @Test
-    @Transactional
     @WithMockUser(authorities = "ADMIN")
     void findById()throws Exception {
         PostSaveRequest req = PostSaveRequest.builder()
@@ -143,7 +142,6 @@ class PostControllerTest {
             .andExpect(status().isNoContent());
     }
 
-    @Transactional
     @Test
     @WithMockUser(authorities = "ADMIN")
     void update() throws Exception{

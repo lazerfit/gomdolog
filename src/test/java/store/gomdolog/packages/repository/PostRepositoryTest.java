@@ -180,4 +180,14 @@ class PostRepositoryTest {
         assertThat(updatedPost.getTitle()).isEqualTo("수정_제목");
         assertThat(updatedPost.getContent()).isEqualTo("수정_본문");
     }
+
+    @Test
+    void addViews() {
+        Post post = postRepository.findById(1L).orElseThrow(PostNotFound::new);
+
+        post.addViews();
+
+        Post updatedPost = postRepository.findById(1L).orElseThrow(PostNotFound::new);
+        assertThat(updatedPost.getViews()).isEqualTo(1);
+    }
 }

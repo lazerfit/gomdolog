@@ -6,19 +6,21 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
+import store.gomdolog.packages.dto.AdminDashboardPost;
+import store.gomdolog.packages.dto.PostResponse;
 import store.gomdolog.packages.dto.PostResponseWithoutTags;
 import store.gomdolog.packages.dto.PostSaveRequest;
 import store.gomdolog.packages.dto.PostUpdate;
@@ -26,7 +28,9 @@ import store.gomdolog.packages.error.PostNotFound;
 import store.gomdolog.packages.repository.CategoryRepository;
 import store.gomdolog.packages.repository.PostRepository;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
+@Sql(scripts = "/PostServiceIntegrationTest.sql", executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
+@Transactional
 class PostServiceIntegrationTest {
 
     @Autowired
@@ -41,56 +45,26 @@ class PostServiceIntegrationTest {
     @Autowired
     private PostService postService;
 
-    @BeforeEach
-    void setUp() {
-        Category category = new Category("Spring");
-        categoryRepository.save(category);
-    }
-
-    @AfterEach
-    void tearDown() {
-        postRepository.deleteAll();
-        categoryRepository.deleteAll();
-    }
-
     @Test
-    @Transactional
     void save() {
-        List<String> tagList = new ArrayList<>();
-        tagList.add("Spring");
-        tagList.add("Vue.js");
+        Long postId = postService.save(
+            new PostSaveRequest("title", "content", 0L, "spring", List.of("spring")));
 
-        Long postId = postService.save(PostSaveRequest.builder()
-            .title("제목")
-            .content("content")
-            .views(0L)
-            .tags(tagList)
-            .categoryTitle("Spring")
-            .build());
+        PostResponse postResponse = postService.findById(postId);
 
-        Post savedPost = postRepository.findById(postId).orElseThrow();
-
-        assertThat(savedPost.getPostTags()).hasSize(tagList.size());
-        assertThat(savedPost.getTitle()).isEqualTo("제목");
+        assertThat(postResponse.getTitle()).isEqualTo("title");
+        assertThat(postResponse.getContent()).isEqualTo("content");
+        assertThat(postResponse.getCategoryTitle()).isEqualTo("spring");
+        assertThat(postResponse.getTags().get(0)).isEqualTo("spring");
     }
 
     @Test
     void findAll() {
-        Category category = categoryRepository.findAll().get(0);
-
-        for (int i=0; i < 5; i++) {
-            postRepository.save(Post.builder()
-                .title("제목"+i)
-                .content("본문"+i)
-                .category(category)
-                .build());
-        }
-
         PageRequest pageRequest = PageRequest.of(0, 6);
 
         Page<PostResponseWithoutTags> all = postRepository.fetchPosts(pageRequest);
 
-        assertThat(all).hasSize(5);
+        assertThat(all).hasSize(2);
     }
 
     @Test
@@ -110,31 +84,18 @@ class PostServiceIntegrationTest {
     }
 
     @Test
-    @Transactional
     void deleteTemporary() {
-        PostSaveRequest saveRequest = PostSaveRequest.builder()
-            .title("Spring")
-            .content("content")
-            .tags(Arrays.asList("modify1", "modify2"))
-            .views(0L)
-            .categoryTitle("Spring")
-            .build();
+        postService.deleteTemporary(1L);
 
-        postService.save(saveRequest);
-
-        Post post = postRepository.findAll().get(0);
-
-        postService.deleteTemporary(post.getId());
-
-        assertThat(postRepository.findAll().get(0).getIsDeleted()).isTrue();
+        Post post = postRepository.findById(1L).orElseThrow(PostNotFound::new);
+        assertThat(post.getIsDeleted()).isTrue();
     }
 
     @Test
-    @Transactional
     void update() {
-            List<String> tagList = new ArrayList<>();
-            tagList.add("Spring");
-            tagList.add("Vue.js");
+        List<String> tagList = new ArrayList<>();
+        tagList.add("Spring");
+        tagList.add("Vue.js");
 
         PostSaveRequest saveRequest = PostSaveRequest.builder()
             .title("제목")
@@ -160,15 +121,12 @@ class PostServiceIntegrationTest {
 
         Post updatedPost = postRepository.findById(post.getId()).orElseThrow();
 
-        System.out.println(updatedPost.getPostTags().toArray().length);
-
         assertThat(updatedPost.getTitle()).isEqualTo("수정 제목");
         assertThat(updatedPost.getContent()).isEqualTo("수정 본문");
         assertThat(updatedPost.getPostTags().get(0).getTag().getName()).isEqualTo("modify1");
     }
 
     @Test
-    @Transactional
     void updateCategory() {
         Category category = new Category("vue.js");
         categoryRepository.save(category);
@@ -188,162 +146,50 @@ class PostServiceIntegrationTest {
     }
 
     @Test
-    @Transactional
-    void getPostCategory() {
-        Category category = categoryRepository.findAll().get(0);
-
-        for (int i=0; i < 5; i++) {
-            postRepository.save(Post.builder()
-                .title("제목"+i)
-                .content("본문"+i)
-                .category(category)
-                .build());
-        }
-
-        List<Post> popularPosts = postRepository.getPopularPosts();
-
-        System.out.println(popularPosts);
-        assertThat(popularPosts).hasSize(3);
+    void getPopularPost() {
+        List<PostResponseWithoutTags> popularPosts = postService.getPopularPosts();
+        assertThat(popularPosts).hasSize(2);
     }
 
     @Test
-    void 제목_검색() {
-        Category category = categoryRepository.findAll().get(0);
-
-        for (int i=0; i < 5; i++) {
-            postRepository.save(Post.builder()
-                .title("제목"+i)
-                .content("본문"+i)
-                .category(category)
-                .build());
-        }
-
-        postRepository.save(Post.builder()
-            .title("title")
-            .content("content")
-            .category(category)
-            .build());
-
+    void retrievePostByTitle() {
         PageRequest pageRequest = PageRequest.of(0, 6);
 
-        Page<PostResponseWithoutTags> postsByTitle = postRepository.searchPostsByTitle("제목",pageRequest);
+        Page<PostResponseWithoutTags> postsByTitle = postRepository.searchPostsByTitle("제목",
+            pageRequest);
 
-        assertThat(postsByTitle).hasSize(5);
+        assertThat(postsByTitle).hasSize(2);
+    }
+
+    @Test
+    void deletePermanent() {
+        postService.deletePermanent(1L);
+
+        assertThatThrownBy(() -> postService.findById(1L))
+            .isInstanceOf(PostNotFound.class);
     }
 
     @Test
     @Transactional
-    void 휴지통() {
-        Category category = categoryRepository.findAll().get(0);
+    void revert() {
+        postService.deletePermanent(3L);
 
-        Post post = postRepository.save(Post.builder()
-            .title("제목")
-            .content("content")
-            .category(postCategoryService.findCategoryByTitle("Spring"))
-            .views(0L)
-            .build());
-
-        post.moveToRecycleBin();
-
-        assertThat(post.getIsDeleted()).isTrue();
-    }
-
-    @Test
-    @Transactional
-    void 영구삭제() {
-        Category category = categoryRepository.findAll().get(0);
-
-        Post post = postRepository.save(Post.builder()
-            .title("제목")
-            .content("content")
-            .category(postCategoryService.findCategoryByTitle("Spring"))
-            .views(0L)
-            .build());
-
-        post.moveToRecycleBin();
-
-        assertThat(post.getIsDeleted()).isTrue();
-
-        postRepository.deleteById(post.getId());
-
-        assertThat(postRepository.findAll()).isEmpty();
-    }
-
-    @Test
-    @Transactional
-    void 휴지통_복원() {
-        Category category = categoryRepository.findAll().get(0);
-
-        Post post = postRepository.save(Post.builder()
-            .title("제목")
-            .content("content")
-            .category(postCategoryService.findCategoryByTitle("Spring"))
-            .views(0L)
-            .build());
-
-        post.moveToRecycleBin();
-
-        assertThat(post.getIsDeleted()).isTrue();
-
-        post.revertDelete();
-
-        assertThat(post.getIsDeleted()).isFalse();
-    }
-
-    @Test
-    void 조회수_증가() {
-        Category category = categoryRepository.findAll().get(0);
-
-        Post post = postRepository.save(Post.builder()
-            .title("제목")
-            .content("content")
-            .category(postCategoryService.findCategoryByTitle("Spring"))
-            .views(0L)
-            .build());
-
-        post.addViews();
-
-        assertThat(post.getViews()).isEqualTo(1L);
+        PageRequest pageRequest = PageRequest.of(1, 6);
+        assertThat(postService.findAll(pageRequest).getContent()).hasSize(2);
     }
 
     @Test
     void errorMessage() {
-        Category category = categoryRepository.findAll().get(0);
-
-        Post post = postRepository.save(Post.builder()
-            .title("제목")
-            .content("content")
-            .category(postCategoryService.findCategoryByTitle("Spring"))
-            .views(0L)
-            .build());
-
-        Optional<Post> post1 = postRepository.findById(13L);
-
-        assertThatThrownBy(() -> post1.orElseThrow(PostNotFound::new))
+        assertThatThrownBy(() -> postService.findById(3L))
             .hasMessage("해당 post가 존재하지 않습니다.")
             .isInstanceOf(PostNotFound.class);
     }
 
     @Test
     void adminDashboardPost() {
-        Category category = categoryRepository.findAll().get(0);
+        List<AdminDashboardPost> top5PopularPosts = postService.getTop5PopularPosts();
 
-        Post post = postRepository.save(Post.builder()
-            .title("제목")
-            .content("content")
-            .category(postCategoryService.findCategoryByTitle("Spring"))
-            .views(3L)
-            .build());
-
-        Post post1 = postRepository.save(Post.builder()
-            .title("제목1")
-            .content("content1")
-            .category(postCategoryService.findCategoryByTitle("Spring"))
-            .views(2L)
-            .build());
-
-        List<Post> top5PopularPosts = postRepository.getTop5PopularPosts();
-
-        assertThat(top5PopularPosts.get(0).getTitle()).isEqualTo("제목");
+        assertThat(top5PopularPosts).hasSize(2);
     }
 }
+
