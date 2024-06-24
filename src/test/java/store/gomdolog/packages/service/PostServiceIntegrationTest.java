@@ -19,7 +19,7 @@ import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
-import store.gomdolog.packages.dto.AdminDashboardPost;
+import store.gomdolog.packages.dto.AdminDashboardPostResponse;
 import store.gomdolog.packages.dto.PostResponse;
 import store.gomdolog.packages.dto.PostResponseWithoutTags;
 import store.gomdolog.packages.dto.PostSaveRequest;
@@ -48,7 +48,7 @@ class PostServiceIntegrationTest {
     @Test
     void save() {
         Long postId = postService.save(
-            new PostSaveRequest("title", "content", 0L, "spring", List.of("spring")));
+            new PostSaveRequest("title", "content", "spring", List.of("spring")));
 
         PostResponse postResponse = postService.findById(postId);
 
@@ -80,6 +80,7 @@ class PostServiceIntegrationTest {
             assertThat(src).isEqualTo("http://img1.co.kr");
         } else {
             String src = "Default Thumbnail";
+            assertThat(src).isEqualTo("Default Thumbnail");
         }
     }
 
@@ -100,7 +101,6 @@ class PostServiceIntegrationTest {
         PostSaveRequest saveRequest = PostSaveRequest.builder()
             .title("제목")
             .content("content")
-            .views(0L)
             .categoryTitle("Spring")
             .tags(tagList)
             .build();
@@ -187,7 +187,7 @@ class PostServiceIntegrationTest {
 
     @Test
     void adminDashboardPost() {
-        List<AdminDashboardPost> top5PopularPosts = postService.getTop5PopularPosts();
+        List<AdminDashboardPostResponse> top5PopularPosts = postService.getTop5PopularPosts();
 
         assertThat(top5PopularPosts).hasSize(2);
     }

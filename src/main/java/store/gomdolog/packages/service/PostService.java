@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
 import store.gomdolog.packages.domain.Tag;
-import store.gomdolog.packages.dto.AdminDashboardPost;
+import store.gomdolog.packages.dto.AdminDashboardPostResponse;
 import store.gomdolog.packages.dto.PostDeletedResponse;
 import store.gomdolog.packages.dto.PostResponse;
 import store.gomdolog.packages.dto.PostResponseWithoutTags;
@@ -111,8 +111,8 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<AdminDashboardPost> getTop5PopularPosts() {
-        return postRepository.getTop5PopularPosts().stream().map(AdminDashboardPost::new).toList();
+    public List<AdminDashboardPostResponse> getTop5PopularPosts() {
+        return postRepository.getTop5PopularPosts().stream().map(AdminDashboardPostResponse::new).toList();
     }
 
     private String extractThumbnail(String html) {

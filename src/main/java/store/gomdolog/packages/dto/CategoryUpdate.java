@@ -1,11 +1,11 @@
 package store.gomdolog.packages.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
 
 public record CategoryUpdate(
     @NotBlank String title,
-    @NotNull Long id
+    @NotEmpty Long id
 ) {
 
 }

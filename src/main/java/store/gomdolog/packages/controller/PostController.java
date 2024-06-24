@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import store.gomdolog.packages.dto.AdminDashboardPost;
+import store.gomdolog.packages.dto.AdminDashboardPostResponse;
 import store.gomdolog.packages.dto.PostDeletedResponse;
 import store.gomdolog.packages.dto.PostResponse;
 import store.gomdolog.packages.dto.PostResponseWithoutTags;
@@ -86,7 +86,7 @@ public class PostController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @GetMapping("/popular/top5")
-    public List<AdminDashboardPost> findPopularTop5() {
+    public List<AdminDashboardPostResponse> findPopularTop5() {
         return postService.getTop5PopularPosts();
     }
 
