@@ -11,7 +11,7 @@ import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
 import store.gomdolog.packages.dto.CategoryResponse;
 import store.gomdolog.packages.dto.CategorySaveRequest;
-import store.gomdolog.packages.dto.CategoryUpdate;
+import store.gomdolog.packages.dto.CategoryUpdateRequest;
 import store.gomdolog.packages.error.CategoryNotFound;
 import store.gomdolog.packages.repository.CategoryRepository;
 
@@ -61,7 +61,7 @@ public class CategoryService {
 
     @CacheEvict(value = "categoryCache", allEntries = true)
     @Transactional
-    public void update(CategoryUpdate update) {
+    public void update(CategoryUpdateRequest update) {
         Category category = categoryRepository.findById(update.id()).orElseThrow(CategoryNotFound::new);
         category.update(update);
     }

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import store.gomdolog.packages.dto.CategoryResponse;
 import store.gomdolog.packages.dto.CategorySaveRequest;
-import store.gomdolog.packages.dto.CategoryUpdate;
+import store.gomdolog.packages.dto.CategoryUpdateRequest;
 import store.gomdolog.packages.service.CategoryService;
 
 @Slf4j
@@ -44,7 +44,7 @@ public class CategoryController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PostMapping("/category/update")
-    public void update(@RequestBody @Valid CategoryUpdate update) {
+    public void update(@RequestBody @Valid CategoryUpdateRequest update) {
         categoryService.update(update);
     }
 }

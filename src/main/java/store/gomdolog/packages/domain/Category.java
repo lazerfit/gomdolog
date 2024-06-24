@@ -7,7 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import store.gomdolog.packages.dto.CategoryUpdate;
+import store.gomdolog.packages.dto.CategoryUpdateRequest;
 
 @Entity
 @Getter
@@ -26,7 +26,7 @@ public class Category {
         this.title = title;
     }
 
-    public void update(CategoryUpdate update) {
+    public void update(CategoryUpdateRequest update) {
         this.title = update.title();
     }
 }
