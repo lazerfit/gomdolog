@@ -4,12 +4,12 @@ import lombok.Getter;
 import store.gomdolog.packages.domain.Post;
 
 @Getter
-public class AdminDashboardPost {
+public class AdminDashboardPostResponse {
 
     private final String title;
     private final Long views;
 
-    public AdminDashboardPost(Post post) {
+    public AdminDashboardPostResponse(Post post) {
         title = post.getTitle();
         views = post.getViews();
     }
