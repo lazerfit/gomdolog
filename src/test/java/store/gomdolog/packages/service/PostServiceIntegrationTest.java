@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
 import store.gomdolog.packages.dto.AdminDashboardPostResponse;
-import store.gomdolog.packages.dto.PostResponse;
+import store.gomdolog.packages.dto.PostDetailResponse;
 import store.gomdolog.packages.dto.PostResponseWithoutTags;
 import store.gomdolog.packages.dto.PostSaveRequest;
 import store.gomdolog.packages.dto.PostUpdate;
@@ -50,11 +50,10 @@ class PostServiceIntegrationTest {
         Long postId = postService.save(
             new PostSaveRequest("title", "content", "spring", List.of("spring")));
 
-        PostResponse postResponse = postService.findById(postId);
+        PostDetailResponse postResponse = postService.findById(postId);
 
         assertThat(postResponse.getTitle()).isEqualTo("title");
         assertThat(postResponse.getContent()).isEqualTo("content");
-        assertThat(postResponse.getCategoryTitle()).isEqualTo("spring");
         assertThat(postResponse.getTags().get(0)).isEqualTo("spring");
     }
 
@@ -62,7 +61,7 @@ class PostServiceIntegrationTest {
     void findAll() {
         PageRequest pageRequest = PageRequest.of(0, 6);
 
-        Page<PostResponseWithoutTags> all = postRepository.fetchPosts(pageRequest);
+        Page<PostResponseWithoutTags> all = postRepository.fetchAll(pageRequest);
 
         assertThat(all).hasSize(2);
     }
@@ -147,7 +146,7 @@ class PostServiceIntegrationTest {
 
     @Test
     void getPopularPost() {
-        List<PostResponseWithoutTags> popularPosts = postService.getPopularPosts();
+        List<PostResponseWithoutTags> popularPosts = postService.fetchPostsPopular(3);
         assertThat(popularPosts).hasSize(2);
     }
 
@@ -187,7 +186,7 @@ class PostServiceIntegrationTest {
 
     @Test
     void adminDashboardPost() {
-        List<AdminDashboardPostResponse> top5PopularPosts = postService.getTop5PopularPosts();
+        List<AdminDashboardPostResponse> top5PopularPosts = postService.fetchPostPopularForAdmin(5);
 
         assertThat(top5PopularPosts).hasSize(2);
     }

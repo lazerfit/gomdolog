@@ -103,7 +103,6 @@ class PostControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.title").value("제목"))
             .andExpect(jsonPath("$.content").value("내용"))
-            .andExpect(jsonPath("$.categoryTitle").value("vue.js"))
             .andExpect(jsonPath("$.tags", containsInAnyOrder("spring","vue.js")));
     }
 
@@ -176,7 +175,9 @@ class PostControllerTest {
                 .build());
         }
 
-        mockMvc.perform(get("/api/post/popular"))
+        String limit = "3";
+
+        mockMvc.perform(get("/api/post/popular?limit="+limit))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(3)));
@@ -303,25 +304,27 @@ class PostControllerTest {
     void adminDashboard() throws Exception {
         Category category = categoryRepository.findAll().get(0);
 
-        Post post = postRepository.save(Post.builder()
+        postRepository.save(Post.builder()
             .title("제목")
             .content("content")
             .category(category)
             .views(3L)
             .build());
 
-        Post post1 = postRepository.save(Post.builder()
+        postRepository.save(Post.builder()
             .title("제목1")
             .content("content1")
             .category(category)
-            .views(2L)
+            .views(4L)
             .build());
 
-        mockMvc.perform(get("/api/post/popular/top5"))
+        String limit = "5";
+
+        mockMvc.perform(get("/api/post/popular/top5?limit={limit}", limit))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(2)))
-            .andExpect(jsonPath("$[0].views").value(3L));
+            .andExpect(jsonPath("$[0].views").value(4L));
     }
 
 }

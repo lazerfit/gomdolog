@@ -58,14 +58,14 @@ public class PostService {
     @Cacheable(value = "postCache", unless = "#result == null", key = "{#id}")
     @Transactional(readOnly = true)
     public PostDetailResponse findById(Long id) {
-        Post post = postRepository.fetchById(id).orElseThrow(PostNotFound::new);
+        Post post = postRepository.fetchOneById(id).orElseThrow(PostNotFound::new);
         return new PostDetailResponse(post);
     }
 
     @Cacheable(value = "postAllCache", key = "{#pageable.pageSize}", unless = "#result == null")
     @Transactional(readOnly = true)
     public Page<PostResponseWithoutTags> findAll(Pageable pageable) {
-        return postRepository.fetchPosts(pageable);
+        return postRepository.fetchAll(pageable);
     }
 
     @CacheEvict(value = {"postAllCache", "postByCategory"}, allEntries = true)
@@ -107,13 +107,13 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponseWithoutTags> getPopularPosts() {
-        return postRepository.getPopularPosts().stream().map(PostResponseWithoutTags::new).toList();
+    public List<PostResponseWithoutTags> fetchPostsPopular(int limit) {
+        return postRepository.fetchPopular(limit).stream().map(PostResponseWithoutTags::new).toList();
     }
 
     @Transactional(readOnly = true)
-    public List<AdminDashboardPostResponse> getTop5PopularPosts() {
-        return postRepository.getTop5PopularPosts().stream().map(AdminDashboardPostResponse::new).toList();
+    public List<AdminDashboardPostResponse> fetchPostPopularForAdmin(int limit) {
+        return postRepository.fetchPopular(limit).stream().map(AdminDashboardPostResponse::new).toList();
     }
 
     private String extractThumbnail(String html) {

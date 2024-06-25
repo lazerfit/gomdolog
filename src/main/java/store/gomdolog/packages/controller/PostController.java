@@ -80,14 +80,14 @@ public class PostController {
 
     @PreAuthorize("permitAll()")
     @GetMapping("/popular")
-    public List<PostResponseWithoutTags> findPopular() {
-        return postService.getPopularPosts();
+    public List<PostResponseWithoutTags> findPopular(@RequestParam int limit) {
+        return postService.fetchPostsPopular(limit);
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @GetMapping("/popular/top5")
-    public List<AdminDashboardPostResponse> findPopularTop5() {
-        return postService.getTop5PopularPosts();
+    public List<AdminDashboardPostResponse> findPopularTop5(@RequestParam int limit) {
+        return postService.fetchPostPopularForAdmin(limit);
     }
 
     @PreAuthorize("permitAll()")

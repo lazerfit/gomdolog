@@ -41,7 +41,7 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
     }
 
     @Override
-    public Page<PostResponseWithoutTags> fetchPosts(Pageable pageable) {
+    public Page<PostResponseWithoutTags> fetchAll(Pageable pageable) {
         List<PostResponseWithoutTags> postList = query.select(new QPostResponseWithoutTags(
                 post.id,
                 post.title,
