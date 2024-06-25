@@ -16,7 +16,7 @@ import store.gomdolog.packages.domain.Post;
 import store.gomdolog.packages.domain.Tag;
 import store.gomdolog.packages.dto.AdminDashboardPostResponse;
 import store.gomdolog.packages.dto.PostDeletedResponse;
-import store.gomdolog.packages.dto.PostResponse;
+import store.gomdolog.packages.dto.PostDetailResponse;
 import store.gomdolog.packages.dto.PostResponseWithoutTags;
 import store.gomdolog.packages.dto.PostSaveRequest;
 import store.gomdolog.packages.dto.PostUpdate;
@@ -57,9 +57,9 @@ public class PostService {
 
     @Cacheable(value = "postCache", unless = "#result == null", key = "{#id}")
     @Transactional(readOnly = true)
-    public PostResponse findById(Long id) {
+    public PostDetailResponse findById(Long id) {
         Post post = postRepository.fetchById(id).orElseThrow(PostNotFound::new);
-        return new PostResponse(post);
+        return new PostDetailResponse(post);
     }
 
     @Cacheable(value = "postAllCache", key = "{#pageable.pageSize}", unless = "#result == null")
@@ -91,7 +91,7 @@ public class PostService {
     @CacheEvict(value = {"postAllCache", "postByCategory", "postCache"}, allEntries = true)
     @Transactional
     public void update(PostUpdate update) {
-        Post post = postRepository.findById(update.id()).orElseThrow();
+        Post post = postRepository.findById(update.id()).orElseThrow(PostNotFound::new);
         post.update(update);
 
         if (!update.categoryTitle().equals(post.getCategory().getTitle())) {
@@ -103,6 +103,7 @@ public class PostService {
         postTagService.delete(post.getId());
         List<Tag> tagList = tagService.save(update.tags());
         postTagService.save(post, tagList);
+
     }
 
     @Transactional(readOnly = true)

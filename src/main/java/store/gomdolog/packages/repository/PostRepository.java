@@ -11,7 +11,7 @@ public interface PostRepository extends PostRepositoryCustom, JpaRepository<Post
 
     List<Post> findAllByCategory(Category category);
 
-    @Query("select p from Post p where p.isDeleted = false order by p.views desc limit 3")
+    @Query("select p from Post p join fetch p.category c where p.isDeleted = false order by p.views desc limit 3")
     List<Post> getPopularPosts();
 
     @Query("select p from Post p where p.isDeleted = false order by p.views desc limit 5")
