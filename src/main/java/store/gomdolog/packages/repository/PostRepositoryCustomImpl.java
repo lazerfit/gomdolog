@@ -35,9 +35,10 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
             .limit(pageable.getPageSize())
             .fetch();
 
-        int totalSize = query.selectFrom(post).where(post.title.like("%" + q + "%")).fetch().size();
+        int totalCount = query.select(post.count()).from(post).where(post.title.like("%" + q + "%"))
+            .fetch().size();
 
-        return new PageImpl<>(postList, pageable, totalSize);
+        return new PageImpl<>(postList, pageable, totalCount);
     }
 
     @Override
@@ -56,7 +57,7 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
             .limit(pageable.getPageSize())
             .fetch();
 
-        int totalCount = query.selectFrom(post).fetch().size();
+        int totalCount = query.select(post.count()).from(post).fetch().size();
 
         return new PageImpl<>(postList,pageable,totalCount);
     }
@@ -78,9 +79,10 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
             .limit(pageable.getPageSize())
             .fetch();
 
-        int totalSize = query.selectFrom(post).where(post.category.title.eq(q)).fetch().size();
+        int totalCount = query.select(post.count()).from(post).where(post.category.title.eq(q))
+            .fetch().size();
 
-        return new PageImpl<>(postList,pageable,totalSize);
+        return new PageImpl<>(postList,pageable,totalCount);
     }
 
     @Override
