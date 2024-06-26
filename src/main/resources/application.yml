@@ -7,7 +7,11 @@ spring:
     password: 1111
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
-    open-in-view: true
+    show-sql: true
+    properties:
+      hibernate:
+        default_batch_fetch_size: 20
+        format_sql: true
     hibernate:
       ddl-auto: update
       naming:
@@ -18,7 +22,6 @@ spring:
 
 logging:
   level:
-    org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 management:
