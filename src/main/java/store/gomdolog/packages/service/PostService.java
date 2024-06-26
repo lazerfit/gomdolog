@@ -14,9 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
 import store.gomdolog.packages.domain.Tag;
-import store.gomdolog.packages.dto.AdminDashboardPost;
+import store.gomdolog.packages.dto.AdminDashboardPostResponse;
 import store.gomdolog.packages.dto.PostDeletedResponse;
-import store.gomdolog.packages.dto.PostResponse;
+import store.gomdolog.packages.dto.PostDetailResponse;
 import store.gomdolog.packages.dto.PostResponseWithoutTags;
 import store.gomdolog.packages.dto.PostSaveRequest;
 import store.gomdolog.packages.dto.PostUpdate;
@@ -57,15 +57,15 @@ public class PostService {
 
     @Cacheable(value = "postCache", unless = "#result == null", key = "{#id}")
     @Transactional(readOnly = true)
-    public PostResponse findById(Long id) {
-        Post post = postRepository.fetchById(id).orElseThrow(PostNotFound::new);
-        return new PostResponse(post);
+    public PostDetailResponse findById(Long id) {
+        Post post = postRepository.fetchOneById(id).orElseThrow(PostNotFound::new);
+        return new PostDetailResponse(post);
     }
 
     @Cacheable(value = "postAllCache", key = "{#pageable.pageSize}", unless = "#result == null")
     @Transactional(readOnly = true)
     public Page<PostResponseWithoutTags> findAll(Pageable pageable) {
-        return postRepository.fetchPosts(pageable);
+        return postRepository.fetchAll(pageable);
     }
 
     @CacheEvict(value = {"postAllCache", "postByCategory"}, allEntries = true)
@@ -91,7 +91,7 @@ public class PostService {
     @CacheEvict(value = {"postAllCache", "postByCategory", "postCache"}, allEntries = true)
     @Transactional
     public void update(PostUpdate update) {
-        Post post = postRepository.findById(update.id()).orElseThrow();
+        Post post = postRepository.findById(update.id()).orElseThrow(PostNotFound::new);
         post.update(update);
 
         if (!update.categoryTitle().equals(post.getCategory().getTitle())) {
@@ -103,16 +103,17 @@ public class PostService {
         postTagService.delete(post.getId());
         List<Tag> tagList = tagService.save(update.tags());
         postTagService.save(post, tagList);
+
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponseWithoutTags> getPopularPosts() {
-        return postRepository.getPopularPosts().stream().map(PostResponseWithoutTags::new).toList();
+    public List<PostResponseWithoutTags> fetchPostsPopular(int limit) {
+        return postRepository.fetchPopular(limit).stream().map(PostResponseWithoutTags::new).toList();
     }
 
     @Transactional(readOnly = true)
-    public List<AdminDashboardPost> getTop5PopularPosts() {
-        return postRepository.getTop5PopularPosts().stream().map(AdminDashboardPost::new).toList();
+    public List<AdminDashboardPostResponse> fetchPostPopularForAdmin(int limit) {
+        return postRepository.fetchPopular(limit).stream().map(AdminDashboardPostResponse::new).toList();
     }
 
     private String extractThumbnail(String html) {

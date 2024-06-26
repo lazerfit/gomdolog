@@ -87,7 +87,7 @@ class PostRepositoryTest {
 
     @Test
     void select4() {
-        List<Post> popularPosts = postRepository.getPopularPosts();
+        List<Post> popularPosts = postRepository.fetchPopular(3);
 
         assertThat(popularPosts).hasSize(2);
         Post post = popularPosts.get(0);
@@ -126,7 +126,7 @@ class PostRepositoryTest {
     void select7() {
         PageRequest pageRequest = PageRequest.of(1, 6);
 
-        Page<PostResponseWithoutTags> posts = postRepository.fetchPosts(
+        Page<PostResponseWithoutTags> posts = postRepository.fetchAll(
             pageRequest);
 
         assertThat(posts.get()).hasSize(2);
@@ -143,7 +143,7 @@ class PostRepositoryTest {
 
     @Test
     void select9() {
-        Optional<Post> post = postRepository.fetchById(3L);
+        Optional<Post> post = postRepository.fetchOneById(3L);
 
         assertThatThrownBy(() -> post.orElseThrow(PostNotFound::new))
             .isInstanceOf(PostNotFound.class);

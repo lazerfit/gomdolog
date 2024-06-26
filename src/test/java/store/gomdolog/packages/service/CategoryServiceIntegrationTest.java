@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
-import store.gomdolog.packages.dto.CategoryUpdate;
+import store.gomdolog.packages.dto.CategoryUpdateRequest;
 import store.gomdolog.packages.error.CategoryNotFound;
 import store.gomdolog.packages.repository.CategoryRepository;
 import store.gomdolog.packages.repository.PostRepository;
@@ -98,13 +98,6 @@ class CategoryServiceIntegrationTest {
 
         categoryRepository.save(category);
 
-        Post saved = postRepository.save(Post.builder()
-            .title("제목")
-            .content("content")
-            .category(category)
-            .views(0L)
-            .build());
-
         List<Post> postList = postCategoryService.findPostsByCategory(category);
 
         if (categoryRepository.findByTitle("없음").isEmpty()) {
@@ -124,7 +117,7 @@ class CategoryServiceIntegrationTest {
     void update() {
         Category category = new Category("Vue.js");
         Category saved = categoryRepository.save(category);
-        CategoryUpdate update = new CategoryUpdate("Spring", saved.getId());
+        CategoryUpdateRequest update = new CategoryUpdateRequest("Spring", saved.getId());
 
         Category category1 = categoryRepository.findById(update.id()).orElseThrow();
         category1.update(update);

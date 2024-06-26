@@ -19,8 +19,8 @@ import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
-import store.gomdolog.packages.dto.AdminDashboardPost;
-import store.gomdolog.packages.dto.PostResponse;
+import store.gomdolog.packages.dto.AdminDashboardPostResponse;
+import store.gomdolog.packages.dto.PostDetailResponse;
 import store.gomdolog.packages.dto.PostResponseWithoutTags;
 import store.gomdolog.packages.dto.PostSaveRequest;
 import store.gomdolog.packages.dto.PostUpdate;
@@ -48,13 +48,12 @@ class PostServiceIntegrationTest {
     @Test
     void save() {
         Long postId = postService.save(
-            new PostSaveRequest("title", "content", 0L, "spring", List.of("spring")));
+            new PostSaveRequest("title", "content", "spring", List.of("spring")));
 
-        PostResponse postResponse = postService.findById(postId);
+        PostDetailResponse postResponse = postService.findById(postId);
 
         assertThat(postResponse.getTitle()).isEqualTo("title");
         assertThat(postResponse.getContent()).isEqualTo("content");
-        assertThat(postResponse.getCategoryTitle()).isEqualTo("spring");
         assertThat(postResponse.getTags().get(0)).isEqualTo("spring");
     }
 
@@ -62,7 +61,7 @@ class PostServiceIntegrationTest {
     void findAll() {
         PageRequest pageRequest = PageRequest.of(0, 6);
 
-        Page<PostResponseWithoutTags> all = postRepository.fetchPosts(pageRequest);
+        Page<PostResponseWithoutTags> all = postRepository.fetchAll(pageRequest);
 
         assertThat(all).hasSize(2);
     }
@@ -80,6 +79,7 @@ class PostServiceIntegrationTest {
             assertThat(src).isEqualTo("http://img1.co.kr");
         } else {
             String src = "Default Thumbnail";
+            assertThat(src).isEqualTo("Default Thumbnail");
         }
     }
 
@@ -100,7 +100,6 @@ class PostServiceIntegrationTest {
         PostSaveRequest saveRequest = PostSaveRequest.builder()
             .title("제목")
             .content("content")
-            .views(0L)
             .categoryTitle("Spring")
             .tags(tagList)
             .build();
@@ -147,7 +146,7 @@ class PostServiceIntegrationTest {
 
     @Test
     void getPopularPost() {
-        List<PostResponseWithoutTags> popularPosts = postService.getPopularPosts();
+        List<PostResponseWithoutTags> popularPosts = postService.fetchPostsPopular(3);
         assertThat(popularPosts).hasSize(2);
     }
 
@@ -187,7 +186,7 @@ class PostServiceIntegrationTest {
 
     @Test
     void adminDashboardPost() {
-        List<AdminDashboardPost> top5PopularPosts = postService.getTop5PopularPosts();
+        List<AdminDashboardPostResponse> top5PopularPosts = postService.fetchPostPopularForAdmin(5);
 
         assertThat(top5PopularPosts).hasSize(2);
     }

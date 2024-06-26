@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import store.gomdolog.packages.dto.AdminDashboardPost;
+import store.gomdolog.packages.dto.AdminDashboardPostResponse;
 import store.gomdolog.packages.dto.PostDeletedResponse;
-import store.gomdolog.packages.dto.PostResponse;
+import store.gomdolog.packages.dto.PostDetailResponse;
 import store.gomdolog.packages.dto.PostResponseWithoutTags;
 import store.gomdolog.packages.dto.PostSaveRequest;
 import store.gomdolog.packages.dto.PostUpdate;
@@ -47,7 +47,7 @@ public class PostController {
 
     @PreAuthorize("permitAll()")
     @GetMapping("/{id}")
-    public PostResponse findById(@PathVariable Long id) {
+    public PostDetailResponse findById(@PathVariable Long id) {
         return postService.findById(id);
     }
 
@@ -80,14 +80,14 @@ public class PostController {
 
     @PreAuthorize("permitAll()")
     @GetMapping("/popular")
-    public List<PostResponseWithoutTags> findPopular() {
-        return postService.getPopularPosts();
+    public List<PostResponseWithoutTags> findPopular(@RequestParam int limit) {
+        return postService.fetchPostsPopular(limit);
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @GetMapping("/popular/top5")
-    public List<AdminDashboardPost> findPopularTop5() {
-        return postService.getTop5PopularPosts();
+    public List<AdminDashboardPostResponse> findPopularTop5(@RequestParam int limit) {
+        return postService.fetchPostPopularForAdmin(limit);
     }
 
     @PreAuthorize("permitAll()")

@@ -20,7 +20,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.dto.CategorySaveRequest;
-import store.gomdolog.packages.dto.CategoryUpdate;
+import store.gomdolog.packages.dto.CategoryUpdateRequest;
 import store.gomdolog.packages.repository.CategoryRepository;
 
 @SpringBootTest
@@ -90,7 +90,7 @@ class CategoryControllerTest {
     void update() throws Exception {
         Category category = new Category("Vue.js");
         Category saved = categoryRepository.save(category);
-        CategoryUpdate update = new CategoryUpdate("Spring", saved.getId());
+        CategoryUpdateRequest update = new CategoryUpdateRequest("Spring", saved.getId());
 
         mockMvc.perform(post("/api/category/update")
             .contentType(APPLICATION_JSON)
