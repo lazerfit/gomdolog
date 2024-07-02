@@ -33,3 +33,7 @@ management:
 jwt:
   token:
     secret: 4rZceoPO8qHVJcMPNJp9fTmKrbwm/6gEOQEf2fEdaUo=
+
+llm:
+  api: http://localhost:8000
+  secret: u453BdMu69dC1m8+u4iUNOZ0VFYmTWRE0LiFocxU++g=

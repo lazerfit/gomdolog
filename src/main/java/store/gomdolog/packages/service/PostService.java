@@ -1,6 +1,7 @@
 package store.gomdolog.packages.service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
@@ -9,8 +10,11 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
 import store.gomdolog.packages.domain.PostSummary;
@@ -20,6 +24,7 @@ import store.gomdolog.packages.dto.PostDeletedResponse;
 import store.gomdolog.packages.dto.PostDetailResponse;
 import store.gomdolog.packages.dto.PostResponseWithoutTags;
 import store.gomdolog.packages.dto.PostSaveRequest;
+import store.gomdolog.packages.dto.PostSummaryDTO;
 import store.gomdolog.packages.dto.PostUpdate;
 import store.gomdolog.packages.error.PostNotFound;
 import store.gomdolog.packages.repository.PostRepository;
@@ -37,29 +42,32 @@ public class PostService {
 
     @CacheEvict(value = {"postAllCache", "postByCategory"}, allEntries = true)
     @Transactional
-    public void saveV2(PostSaveRequest request) {
-        Category category = postCategoryService.findCategoryByTitle(request.categoryTitle());
+    public Mono<ResponseEntity<PostSummaryDTO>> saveV2(PostSaveRequest request) {
+        return postSummaryService.getSummary(request.content())
+            .publishOn(Schedulers.boundedElastic())
+            .doOnSuccess(res -> {
+                Category category = postCategoryService.findCategoryByTitle(request.categoryTitle());
 
-        postSummaryService.getSummary(request.content())
-            .subscribe(res -> {
-                    PostSummary postSummary = postSummaryService.save(res.content());
-                    Post post = Post.builder()
-                        .title(request.title())
-                        .content(request.content())
-                        .views(0L)
-                        .thumbnail(extractThumbnail(request.content()))
-                        .category(category)
-                        .postSummary(postSummary)
-                        .build();
+                PostSummary postSummary = postSummaryService.save(
+                    Objects.requireNonNull(res.getBody()).content());
 
-                    Post savedPost = postRepository.save(post);
+                Post post = Post.builder()
+                    .title(request.title())
+                    .content(request.content())
+                    .views(0L)
+                    .thumbnail(extractThumbnail(request.content()))
+                    .category(category)
+                    .postSummary(postSummary)
+                    .build();
 
-                    if (!request.tags().isEmpty()) {
-                        List<Tag> tagList = tagService.save(request.tags());
-                        postTagService.save(savedPost, tagList);
-                    }
-                },
-                error -> log.info("postSummary error : {}", error.getMessage()));
+                Post savedPost = postRepository.save(post);
+
+                if (!request.tags().isEmpty()) {
+                    List<Tag> tagList = tagService.save(request.tags());
+                    postTagService.save(savedPost, tagList);
+                }
+            })
+            .doOnError(e -> log.info("post summary error: {}", e.getMessage()));
     }
 
     @CacheEvict(value = {"postAllCache", "postByCategory"}, allEntries = true)
