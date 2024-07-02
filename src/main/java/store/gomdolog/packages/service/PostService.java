@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
+import store.gomdolog.packages.domain.PostSummary;
 import store.gomdolog.packages.domain.Tag;
 import store.gomdolog.packages.dto.AdminDashboardPostResponse;
 import store.gomdolog.packages.dto.PostDeletedResponse;
@@ -32,6 +33,34 @@ public class PostService {
     private final PostCategoryService postCategoryService;
     private final TagService tagService;
     private final PostTagService postTagService;
+    private final PostSummaryService postSummaryService;
+
+    @CacheEvict(value = {"postAllCache", "postByCategory"}, allEntries = true)
+    @Transactional
+    public void saveV2(PostSaveRequest request) {
+        Category category = postCategoryService.findCategoryByTitle(request.categoryTitle());
+
+        postSummaryService.getSummary(request.content())
+            .subscribe(res -> {
+                    PostSummary postSummary = postSummaryService.save(res.content());
+                    Post post = Post.builder()
+                        .title(request.title())
+                        .content(request.content())
+                        .views(0L)
+                        .thumbnail(extractThumbnail(request.content()))
+                        .category(category)
+                        .postSummary(postSummary)
+                        .build();
+
+                    Post savedPost = postRepository.save(post);
+
+                    if (!request.tags().isEmpty()) {
+                        List<Tag> tagList = tagService.save(request.tags());
+                        postTagService.save(savedPost, tagList);
+                    }
+                },
+                error -> log.info("postSummary error : {}", error.getMessage()));
+    }
 
     @CacheEvict(value = {"postAllCache", "postByCategory"}, allEntries = true)
     @Transactional
@@ -47,9 +76,10 @@ public class PostService {
             .build();
 
         Post savedPost = postRepository.save(post);
+
         if (!request.tags().isEmpty()) {
             List<Tag> tagList = tagService.save(request.tags());
-            postTagService.save(post, tagList);
+            postTagService.save(savedPost, tagList);
         }
 
         return savedPost.getId();

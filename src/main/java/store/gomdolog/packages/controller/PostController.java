@@ -36,7 +36,7 @@ public class PostController {
     @PostMapping("/new")
     @ResponseStatus(HttpStatus.CREATED)
     public void save(@RequestBody @Valid PostSaveRequest req) {
-        postService.save(req);
+        postService.saveV2(req);
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")

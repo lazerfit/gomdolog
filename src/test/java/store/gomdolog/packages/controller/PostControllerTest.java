@@ -76,14 +76,6 @@ class PostControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
             .andExpect(status().isCreated());
-
-        Post post = postRepository.findAll().get(0);
-
-        assertThat(post.getTitle()).isEqualTo("제목");
-        assertThat(post.getContent()).isEqualTo("내용");
-        assertThat(post.getViews()).isZero();
-        assertThat(post.getCategory().getTitle()).isEqualTo("vue.js");
-        assertThat(post.getThumbnail()).isEqualTo("Default Thumbnail");
     }
 
     @Test

@@ -16,4 +16,7 @@ public interface PostRepository extends PostRepositoryCustom, JpaRepository<Post
 
     @Query("select p from Post p where p.isDeleted = false and p.id = :id")
     Optional<Post> fetchOneById(Long id);
+
+    @Query("select p from Post p join fetch p.category where p.title = :title")
+    Optional<Post> findByTitle(String title);
 }
