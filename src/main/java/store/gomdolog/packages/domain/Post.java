@@ -60,7 +60,7 @@ public class Post {
     @JoinColumn(name = "CATEGORY_ID")
     private Category category;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "POSTSUMMARY_ID")
     private PostSummary postSummary;
 
