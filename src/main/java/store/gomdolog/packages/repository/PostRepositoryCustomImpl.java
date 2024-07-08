@@ -5,6 +5,7 @@ import static store.gomdolog.packages.domain.QPost.post;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +14,7 @@ import store.gomdolog.packages.dto.PostResponseWithoutTags;
 import store.gomdolog.packages.dto.QPostDeletedResponse;
 import store.gomdolog.packages.dto.QPostResponseWithoutTags;
 
+@Slf4j
 @RequiredArgsConstructor
 public class PostRepositoryCustomImpl implements PostRepositoryCustom {
 
@@ -32,11 +34,12 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
             .where(post.title.like("%" + q + "%"))
             .where(post.isDeleted.isFalse())
             .orderBy(post.createdDate.desc())
+            .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();
 
-        int totalCount = query.select(post.count()).from(post).where(post.title.like("%" + q + "%"))
-            .fetch().size();
+        Long totalCount = query.select(post.count()).from(post).where(post.title.like("%" + q + "%"))
+            .fetchOne();
 
         return new PageImpl<>(postList, pageable, totalCount);
     }
@@ -54,11 +57,11 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
             .from(post)
             .where(post.isDeleted.isFalse())
             .orderBy(post.createdDate.desc())
+            .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();
 
-        int totalCount = query.select(post.count()).from(post).fetch().size();
-
+        Long totalCount = query.select(post.count()).from(post).fetchOne();
         return new PageImpl<>(postList,pageable,totalCount);
     }
 
@@ -76,17 +79,18 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
             .where(post.category.title.eq(q))
             .where(post.isDeleted.isFalse())
             .orderBy(post.createdDate.desc())
+            .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();
 
-        int totalCount = query.select(post.count()).from(post).where(post.category.title.eq(q))
-            .fetch().size();
+        Long totalCount = query.select(post.count()).from(post).where(post.category.title.eq(q))
+            .fetchOne();
 
         return new PageImpl<>(postList,pageable,totalCount);
     }
 
     @Override
-    public List<PostDeletedResponse> fetchDeletedPost() {
+    public List<PostDeletedResponse> findDeleted() {
         return query.select(new QPostDeletedResponse(
             post.id,
             post.title

@@ -65,4 +65,9 @@ public class CategoryService {
         Category category = categoryRepository.findById(update.id()).orElseThrow(CategoryNotFound::new);
         category.update(update);
     }
+
+    @Transactional(readOnly = true)
+    public Category findByTitle(String title) {
+        return categoryRepository.findByTitle(title).orElseThrow(CategoryNotFound::new);
+    }
 }

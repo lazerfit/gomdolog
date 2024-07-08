@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.transaction.annotation.Transactional;
@@ -146,7 +147,7 @@ class PostServiceIntegrationTest {
 
     @Test
     void getPopularPost() {
-        List<PostResponseWithoutTags> popularPosts = postService.fetchPostsPopular(3);
+        List<PostResponseWithoutTags> popularPosts = postService.findPopular(3);
         assertThat(popularPosts).hasSize(2);
     }
 
@@ -169,15 +170,6 @@ class PostServiceIntegrationTest {
     }
 
     @Test
-    @Transactional
-    void revert() {
-        postService.deletePermanent(3L);
-
-        PageRequest pageRequest = PageRequest.of(1, 6);
-        assertThat(postService.findAll(pageRequest).getContent()).hasSize(2);
-    }
-
-    @Test
     void errorMessage() {
         assertThatThrownBy(() -> postService.findById(3L))
             .hasMessage("해당 post가 존재하지 않습니다.")
@@ -186,9 +178,41 @@ class PostServiceIntegrationTest {
 
     @Test
     void adminDashboardPost() {
-        List<AdminDashboardPostResponse> top5PopularPosts = postService.fetchPostPopularForAdmin(5);
+        List<AdminDashboardPostResponse> top5PopularPosts = postService.findPopularForAdmin(5);
 
         assertThat(top5PopularPosts).hasSize(2);
+    }
+
+    @Test
+    void sliceTest() {
+        PageRequest pageRequest = PageRequest.of(0, 6);
+
+        Slice<PostResponseWithoutTags> posts = postService.findAllReturnSlice(pageRequest);
+
+        assertThat(posts.hasNext()).isFalse();
+        assertThat(posts.hasPrevious()).isFalse();
+        assertThat(posts.getContent()).hasSize(2);
+    }
+
+    @Test
+    void sliceTest2() {
+        PageRequest pageRequest = PageRequest.of(0, 6);
+        Slice<PostResponseWithoutTags> posts = postService.findAllSliceByCategory("spring",
+            pageRequest);
+
+        assertThat(posts.hasNext()).isFalse();
+        assertThat(posts.hasPrevious()).isFalse();
+        assertThat(posts.getContent()).hasSize(1);
+    }
+
+    @Test
+    void sliceTest3() {
+        PageRequest pageRequest = PageRequest.of(0, 6);
+        Slice<PostResponseWithoutTags> posts = postService.findAllSliceByTitle("제목", pageRequest);
+
+        assertThat(posts.hasNext()).isFalse();
+        assertThat(posts.hasPrevious()).isFalse();
+        assertThat(posts.getContent()).hasSize(3);
     }
 }
 

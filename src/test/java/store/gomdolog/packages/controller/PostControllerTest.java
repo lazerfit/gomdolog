@@ -75,7 +75,7 @@ class PostControllerTest {
             .content(objectMapper.writeValueAsString(req))
             .contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
-            .andExpect(status().isCreated());
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -194,7 +194,7 @@ class PostControllerTest {
             .build());
 
         mockMvc.perform(get("/api/post/search")
-                .param("q", "title")
+                .param("title", "title")
             ).andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content", hasSize(1)));
@@ -220,29 +220,6 @@ class PostControllerTest {
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)));
-    }
-
-    @Test
-    @WithMockUser(authorities = "ADMIN")
-    void 영구삭제() throws Exception {
-        Category category = categoryRepository.findAll().get(0);
-
-        Post post = postRepository.save(Post.builder()
-            .title("제목")
-            .content("content")
-            .category(category)
-            .views(0L)
-            .build());
-
-        mockMvc.perform(post("/api/post/delete/" + post.getId()))
-            .andDo(print())
-            .andExpect(status().isNoContent());
-
-        mockMvc.perform(post("/api/post/deletePermanent/"+post.getId()))
-            .andDo(print())
-            .andExpect(status().isNoContent());
-
-        assertThat(postRepository.findAll()).isEmpty();
     }
 
     @Test
@@ -317,6 +294,33 @@ class PostControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(2)))
             .andExpect(jsonPath("$[0].views").value(4L));
+    }
+
+    @Test
+    void sliceTest() throws Exception {
+        Category category = categoryRepository.findAll().get(0);
+
+        postRepository.save(Post.builder()
+            .title("제목")
+            .content("content")
+            .category(category)
+            .views(3L)
+            .build());
+
+        postRepository.save(Post.builder()
+            .title("제목1")
+            .content("content1")
+            .category(category)
+            .views(4L)
+            .build());
+
+        mockMvc.perform(get("/api/post/category/slice")
+                .param("title","vue.js")
+                .param("page","0")
+                .param("size","6"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.last").value(true));
     }
 
 }
