@@ -10,14 +10,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.jdbc.Sql;
 import store.gomdolog.packages.config.QueryDslTestConfig;
 import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
 import store.gomdolog.packages.dto.PostDeletedResponse;
-import store.gomdolog.packages.dto.PostResponseWithoutTags;
 import store.gomdolog.packages.dto.PostUpdate;
 import store.gomdolog.packages.error.PostNotFound;
 
@@ -87,7 +84,7 @@ class PostRepositoryTest {
 
     @Test
     void select4() {
-        List<Post> popularPosts = postRepository.fetchPopular(3);
+        List<Post> popularPosts = postRepository.findPopular(3);
 
         assertThat(popularPosts).hasSize(2);
         Post post = popularPosts.get(0);
@@ -104,37 +101,8 @@ class PostRepositoryTest {
     }
 
     @Test
-    void select5() {
-        PageRequest pageRequest = PageRequest.of(1, 6);
-
-        Page<PostResponseWithoutTags> posts = postRepository.searchPostsByTitle(
-            "제목", pageRequest);
-
-        assertThat(posts.get()).hasSize(2);
-    }
-
-    @Test
-    void select6() {
-        PageRequest pageRequest = PageRequest.of(1, 6);
-        Page<PostResponseWithoutTags> posts = postRepository.searchPostsByCategory("spring",
-            pageRequest);
-
-        assertThat(posts.get()).hasSize(1);
-    }
-
-    @Test
-    void select7() {
-        PageRequest pageRequest = PageRequest.of(1, 6);
-
-        Page<PostResponseWithoutTags> posts = postRepository.fetchAll(
-            pageRequest);
-
-        assertThat(posts.get()).hasSize(2);
-    }
-
-    @Test
     void select8() {
-        List<PostDeletedResponse> posts = postRepository.fetchDeletedPost();
+        List<PostDeletedResponse> posts = postRepository.findDeleted();
 
         assertThat(posts).hasSize(1);
         assertThat(posts.get(0).getId()).isEqualTo(3L);
@@ -143,7 +111,7 @@ class PostRepositoryTest {
 
     @Test
     void select9() {
-        Optional<Post> post = postRepository.fetchOneById(3L);
+        Optional<Post> post = postRepository.findOneById(3L);
 
         assertThatThrownBy(() -> post.orElseThrow(PostNotFound::new))
             .isInstanceOf(PostNotFound.class);

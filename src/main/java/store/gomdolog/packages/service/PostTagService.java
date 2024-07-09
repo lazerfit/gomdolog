@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Post;
 import store.gomdolog.packages.domain.PostTag;
 import store.gomdolog.packages.domain.Tag;
+import store.gomdolog.packages.error.PostNotFound;
 import store.gomdolog.packages.repository.PostTagRepository;
 
 @RequiredArgsConstructor
@@ -27,8 +28,12 @@ public class PostTagService {
 
     @Transactional
     public void delete(Long postId) {
-        List<PostTag> postTagList = postTagRepository.findByPostId(postId)
-            .orElseThrow(() -> new RuntimeException("Post not found"));
+        List<PostTag> postTagList = postTagRepository.findByPostId(postId);
+
+        if(postTagList.isEmpty()) {
+            throw new PostNotFound();
+        }
+
         postTagRepository.deleteByPostId(postId);
         for (PostTag postTag : postTagList) {
             postTag.getPost().getPostTags().remove(postTag);
@@ -36,3 +41,4 @@ public class PostTagService {
         }
     }
 }
+

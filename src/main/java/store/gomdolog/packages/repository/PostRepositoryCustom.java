@@ -11,5 +11,5 @@ public interface PostRepositoryCustom {
     Page<PostResponseWithoutTags> searchPostsByTitle(String q, Pageable pageable);
     Page<PostResponseWithoutTags> searchPostsByCategory(String q, Pageable pageable);
     Page<PostResponseWithoutTags> fetchAll(Pageable pageable);
-    List<PostDeletedResponse> fetchDeletedPost();
+    List<PostDeletedResponse> findDeleted();
 }

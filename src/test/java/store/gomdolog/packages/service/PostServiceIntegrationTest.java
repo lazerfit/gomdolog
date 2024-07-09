@@ -8,17 +8,19 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import org.springframework.data.domain.Slice;
 import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Category;
 import store.gomdolog.packages.domain.Post;
+import store.gomdolog.packages.domain.Tag;
 import store.gomdolog.packages.dto.AdminDashboardPostResponse;
 import store.gomdolog.packages.dto.PostDetailResponse;
 import store.gomdolog.packages.dto.PostResponseWithoutTags;
@@ -27,23 +29,53 @@ import store.gomdolog.packages.dto.PostUpdate;
 import store.gomdolog.packages.error.PostNotFound;
 import store.gomdolog.packages.repository.CategoryRepository;
 import store.gomdolog.packages.repository.PostRepository;
+import store.gomdolog.packages.repository.PostSummaryRepository;
+import store.gomdolog.packages.repository.PostTagRepository;
+import store.gomdolog.packages.repository.TagRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
-@Sql(scripts = "/PostServiceIntegrationTest.sql", executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
 @Transactional
 class PostServiceIntegrationTest {
 
     @Autowired
     private PostRepository postRepository;
-
     @Autowired
     private CategoryRepository categoryRepository;
-
     @Autowired
     private PostCategoryService postCategoryService;
-
     @Autowired
     private PostService postService;
+    @Autowired
+    private PostTagRepository postTagRepository;
+    @Autowired
+    private TagRepository tagRepository;
+    @Autowired
+    private PostSummaryRepository postSummaryRepository;
+    @Autowired
+    private PostTagService postTagService;
+
+    @BeforeEach
+    void setUp() {
+        Category c1 = categoryRepository.save(new Category("spring"));
+        Category c2 = categoryRepository.save(new Category("css"));
+        Category c3 = categoryRepository.save(new Category("Spring"));
+
+        Post p1 = Post.builder().title("제목").content("<p>내용</p>").views(0L).category(c1)
+            .thumbnail("Default Thumbnail").build();
+        postRepository.save(p1);
+        Post p2 = Post.builder().title("제목2").content("<p>내용2</p>").views(0L).category(c2)
+            .thumbnail("Default Thumbnail").build();
+        postRepository.save(p2);
+        Post.builder().title("제목3").content("<p>내용3</p>").views(0L).category(c3)
+            .thumbnail("Default Thumbnail").build();
+        postRepository.save(p2);
+    }
+
+    @AfterEach
+    void tearDown() {
+        postRepository.deleteAll();
+        categoryRepository.deleteAll();
+    }
 
     @Test
     void save() {
@@ -146,7 +178,7 @@ class PostServiceIntegrationTest {
 
     @Test
     void getPopularPost() {
-        List<PostResponseWithoutTags> popularPosts = postService.fetchPostsPopular(3);
+        List<PostResponseWithoutTags> popularPosts = postService.findPopular(3);
         assertThat(popularPosts).hasSize(2);
     }
 
@@ -162,19 +194,18 @@ class PostServiceIntegrationTest {
 
     @Test
     void deletePermanent() {
-        postService.deletePermanent(1L);
+        Tag tag = tagRepository.save(new Tag("spring"));
+        Post post = postRepository.findAll().get(0);
+        postTagService.save(post, List.of(tag));
 
-        assertThatThrownBy(() -> postService.findById(1L))
+        postService.deletePermanent(post.getId());
+
+        Long postId = post.getId();
+
+        assertThatThrownBy(() -> postService.findById(postId))
+            .hasMessage("해당 post가 존재하지 않습니다.")
             .isInstanceOf(PostNotFound.class);
-    }
 
-    @Test
-    @Transactional
-    void revert() {
-        postService.deletePermanent(3L);
-
-        PageRequest pageRequest = PageRequest.of(1, 6);
-        assertThat(postService.findAll(pageRequest).getContent()).hasSize(2);
     }
 
     @Test
@@ -186,9 +217,41 @@ class PostServiceIntegrationTest {
 
     @Test
     void adminDashboardPost() {
-        List<AdminDashboardPostResponse> top5PopularPosts = postService.fetchPostPopularForAdmin(5);
+        List<AdminDashboardPostResponse> top5PopularPosts = postService.findPopularForAdmin(5);
 
         assertThat(top5PopularPosts).hasSize(2);
+    }
+
+    @Test
+    void sliceTest() {
+        PageRequest pageRequest = PageRequest.of(0, 6);
+
+        Slice<PostResponseWithoutTags> posts = postService.findAllReturnSlice(pageRequest);
+
+        assertThat(posts.hasNext()).isFalse();
+        assertThat(posts.hasPrevious()).isFalse();
+        assertThat(posts.getContent()).hasSize(2);
+    }
+
+    @Test
+    void sliceTest2() {
+        PageRequest pageRequest = PageRequest.of(0, 6);
+        Slice<PostResponseWithoutTags> posts = postService.findAllSliceByCategory("spring",
+            pageRequest);
+
+        assertThat(posts.hasNext()).isFalse();
+        assertThat(posts.hasPrevious()).isFalse();
+        assertThat(posts.getContent()).hasSize(1);
+    }
+
+    @Test
+    void sliceTest3() {
+        PageRequest pageRequest = PageRequest.of(0, 6);
+        Slice<PostResponseWithoutTags> posts = postService.findAllSliceByTitle("제목", pageRequest);
+
+        assertThat(posts.hasNext()).isFalse();
+        assertThat(posts.hasPrevious()).isFalse();
+        assertThat(posts.getContent()).hasSize(2);
     }
 }
 
