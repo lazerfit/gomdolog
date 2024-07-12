@@ -21,7 +21,7 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
     private final JPAQueryFactory query;
 
     @Override
-    public Page<PostResponseWithoutTags> searchPostsByTitle(String q, Pageable pageable) {
+    public Page<PostResponseWithoutTags> findPostsByTitle(String q, Pageable pageable) {
         List<PostResponseWithoutTags> postList = query.select(new QPostResponseWithoutTags(
                 post.id,
                 post.title,
@@ -66,7 +66,7 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
     }
 
     @Override
-    public Page<PostResponseWithoutTags> searchPostsByCategory(String q, Pageable pageable) {
+    public Page<PostResponseWithoutTags> findPostsByCategory(String q, Pageable pageable) {
         List<PostResponseWithoutTags> postList = query.select(new QPostResponseWithoutTags(
                 post.id,
                 post.title,

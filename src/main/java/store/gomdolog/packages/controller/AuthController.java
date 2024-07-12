@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import store.gomdolog.packages.dto.JwtAuthenticationResponse;
+import store.gomdolog.packages.dto.UserRoleResponse;
 import store.gomdolog.packages.dto.UserSignInRequest;
 import store.gomdolog.packages.dto.UserSignUpRequest;
 import store.gomdolog.packages.service.UserService;
@@ -41,7 +42,8 @@ public class AuthController {
 
     @PreAuthorize("permitAll()")
     @GetMapping("/getRole")
-    public String getRole(@RequestHeader("Authorization") String jwt) {
-        return userService.getRole(jwt);
+    public UserRoleResponse getRole(@RequestHeader("Authorization") String jwt) {
+        String role = userService.getRole(jwt);
+        return new UserRoleResponse(role);
     }
 }
