@@ -23,7 +23,6 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final UserService self;
 
     @Transactional
     public JwtAuthenticationResponse signUp(UserSignUpRequest userSignUpRequest) {
@@ -40,7 +39,7 @@ public class UserService {
 
         userRepository.save(user);
         String token = jwtService.generateToken(user);
-        String role = self.getRole(token);
+        String role = getRole(token);
 
         return new JwtAuthenticationResponse(token, role);
     }
@@ -54,12 +53,11 @@ public class UserService {
             .orElseThrow(UserNotFound::new);
 
         String token = jwtService.generateToken(user);
-        String role = self.getRole(token);
+        String role = getRole(token);
 
         return new JwtAuthenticationResponse(token, role);
     }
 
-    @Transactional(readOnly = true)
     public String getRole(String token) {
         if (jwtService.isTokenExpired(token)) {
             throw new IllegalArgumentException("잘못된 요청입니다.");
