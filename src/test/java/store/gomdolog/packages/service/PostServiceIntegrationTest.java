@@ -186,7 +186,7 @@ class PostServiceIntegrationTest {
     void retrievePostByTitle() {
         PageRequest pageRequest = PageRequest.of(0, 6);
 
-        Page<PostResponseWithoutTags> postsByTitle = postRepository.searchPostsByTitle("제목",
+        Page<PostResponseWithoutTags> postsByTitle = postRepository.findPostsByTitle("제목",
             pageRequest);
 
         assertThat(postsByTitle).hasSize(2);

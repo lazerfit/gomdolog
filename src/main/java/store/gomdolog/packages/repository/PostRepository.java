@@ -24,4 +24,5 @@ public interface PostRepository extends PostRepositoryCustom, JpaRepository<Post
     Slice<Post> findAllByCategory(Category category, Pageable pageable);
 
     Slice<Post> findAllByTitleContaining(String title, Pageable pageable);
+    
 }

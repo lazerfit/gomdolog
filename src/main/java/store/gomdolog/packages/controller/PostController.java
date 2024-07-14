@@ -110,9 +110,9 @@ public class PostController {
 
     @PreAuthorize("permitAll()")
     @GetMapping("/search")
-    public Page<PostResponseWithoutTags> searchPostsByTitle(@RequestParam("title") String q,
+    public Page<PostResponseWithoutTags> findAllByTitle(@RequestParam("title") String q,
         Pageable pageable) {
-        return postService.searchPostsByTitle(q, pageable);
+        return postService.findAllByTitle(q, pageable);
     }
 
     @PreAuthorize("permitAll()")
@@ -124,9 +124,9 @@ public class PostController {
 
     @PreAuthorize("permitAll()")
     @GetMapping("/category")
-    public Page<PostResponseWithoutTags> searchPostByCategory(@RequestParam("title") String q,
+    public Page<PostResponseWithoutTags> findAllByCategory(@RequestParam("title") String q,
         Pageable pageable) {
-        return postService.searchPostsByCategory(q, pageable);
+        return postService.findAllByCategory(q, pageable);
     }
 
     @PreAuthorize("permitAll()")
@@ -138,11 +138,9 @@ public class PostController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @GetMapping("/recycling")
-    public List<PostDeletedResponse> fetchDeletedPost() {
+    public List<PostDeletedResponse> findDeletedPost() {
         return postService.findDeleted();
     }
-
-
 
     @PreAuthorize("permitAll()")
     @PostMapping("/{id}/views")

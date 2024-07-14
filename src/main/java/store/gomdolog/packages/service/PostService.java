@@ -138,7 +138,12 @@ public class PostService {
     @Transactional
     public void deletePermanent(Long id) {
         postTagService.delete(id);
-        postRepository.deleteById(id);
+        boolean isExist = postRepository.existsById(id);
+        if (isExist) {
+            postRepository.deleteById(id);
+        } else {
+            throw new PostNotFound();
+        }
     }
 
     @CacheEvict(value = {"postAllCache", "postByCategory"}, allEntries = true)
@@ -187,8 +192,8 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PostResponseWithoutTags> searchPostsByTitle(String q, Pageable pageable) {
-        Page<PostResponseWithoutTags> response = postRepository.searchPostsByTitle(q, pageable);
+    public Page<PostResponseWithoutTags> findAllByTitle(String q, Pageable pageable) {
+        Page<PostResponseWithoutTags> response = postRepository.findPostsByTitle(q, pageable);
 
         if (pageable.getPageNumber() > response.getTotalPages()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -210,8 +215,8 @@ public class PostService {
 
     @Cacheable(value = "postByCategory", key = "{#q, #pageable.pageNumber}", unless = "#result == null")
     @Transactional(readOnly = true)
-    public Page<PostResponseWithoutTags> searchPostsByCategory(String q, Pageable pageable) {
-        Page<PostResponseWithoutTags> response = postRepository.searchPostsByCategory(q, pageable);
+    public Page<PostResponseWithoutTags> findAllByCategory(String q, Pageable pageable) {
+        Page<PostResponseWithoutTags> response = postRepository.findPostsByCategory(q, pageable);
 
         if (pageable.getPageNumber() > response.getTotalPages()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
