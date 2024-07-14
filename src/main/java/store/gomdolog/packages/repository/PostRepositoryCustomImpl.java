@@ -38,7 +38,9 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
             .limit(pageable.getPageSize())
             .fetch();
 
-        Long totalCount = query.select(post.count()).from(post).where(post.title.like("%" + q + "%"))
+        Long totalCount = query.select(post.count()).from(post)
+            .where(post.title.like("%" + q + "%"))
+            .where(post.isDeleted.isFalse())
             .fetchOne();
 
         return new PageImpl<>(postList, pageable, totalCount);
@@ -61,7 +63,8 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
             .limit(pageable.getPageSize())
             .fetch();
 
-        Long totalCount = query.select(post.count()).from(post).fetchOne();
+        Long totalCount = query.select(post.count()).from(post).where(post.isDeleted.isFalse())
+            .fetchOne();
         return new PageImpl<>(postList,pageable,totalCount);
     }
 
@@ -76,15 +79,15 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
                 post.category.title
             ))
             .from(post)
-            .where(post.category.title.eq(q))
             .where(post.isDeleted.isFalse())
+            .where(post.category.title.eq(q))
             .orderBy(post.createdDate.desc())
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();
 
         Long totalCount = query.select(post.count()).from(post).where(post.category.title.eq(q))
-            .fetchOne();
+            .where(post.isDeleted.isFalse()).fetchOne();
 
         return new PageImpl<>(postList,pageable,totalCount);
     }

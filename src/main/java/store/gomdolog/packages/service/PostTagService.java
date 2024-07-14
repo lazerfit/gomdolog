@@ -2,14 +2,15 @@ package store.gomdolog.packages.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.gomdolog.packages.domain.Post;
 import store.gomdolog.packages.domain.PostTag;
 import store.gomdolog.packages.domain.Tag;
-import store.gomdolog.packages.error.PostNotFound;
 import store.gomdolog.packages.repository.PostTagRepository;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class PostTagService {
@@ -31,7 +32,7 @@ public class PostTagService {
         List<PostTag> postTagList = postTagRepository.findByPostId(postId);
 
         if(postTagList.isEmpty()) {
-            throw new PostNotFound();
+            return;
         }
 
         postTagRepository.deleteByPostId(postId);

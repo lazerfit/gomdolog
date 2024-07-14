@@ -142,8 +142,6 @@ public class PostController {
         return postService.findDeleted();
     }
 
-
-
     @PreAuthorize("permitAll()")
     @PostMapping("/{id}/views")
     public void addViews(@PathVariable Long id) {

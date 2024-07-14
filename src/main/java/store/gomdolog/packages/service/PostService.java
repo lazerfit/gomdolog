@@ -138,7 +138,12 @@ public class PostService {
     @Transactional
     public void deletePermanent(Long id) {
         postTagService.delete(id);
-        postRepository.deleteById(id);
+        boolean isExist = postRepository.existsById(id);
+        if (isExist) {
+            postRepository.deleteById(id);
+        } else {
+            throw new PostNotFound();
+        }
     }
 
     @CacheEvict(value = {"postAllCache", "postByCategory"}, allEntries = true)
