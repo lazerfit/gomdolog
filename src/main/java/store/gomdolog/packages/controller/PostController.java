@@ -2,6 +2,7 @@ package store.gomdolog.packages.controller;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -59,8 +61,13 @@ public class PostController {
 
     @PreAuthorize("permitAll()")
     @GetMapping("/{id}")
-    public PostDetailResponse findById(@PathVariable Long id) {
-        return postService.findById(id);
+    public ResponseEntity<PostDetailResponse> findById(@PathVariable Long id) {
+        PostDetailResponse post = postService.findById(id);
+        String etag = String.valueOf(post.getUpdatedDate());
+        return ResponseEntity.ok()
+            .cacheControl(CacheControl.maxAge(30, TimeUnit.DAYS))
+            .eTag(etag)
+            .body(post);
     }
 
     @PreAuthorize("permitAll()")
