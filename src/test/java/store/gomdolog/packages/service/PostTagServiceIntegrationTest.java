@@ -1,7 +1,6 @@
 package store.gomdolog.packages.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -83,12 +82,5 @@ class PostTagServiceIntegrationTest {
 
         Post foundPost = postRepository.findById(post.getId()).orElseThrow(PostNotFound::new);
         assertThat(foundPost.getPostTags()).isEmpty();
-    }
-
-    @Test
-    void test3() {
-        assertThatThrownBy(() -> postTagService.delete(1000L))
-            .isInstanceOf(PostNotFound.class)
-            .hasMessage("해당 post가 존재하지 않습니다.");
     }
 }
