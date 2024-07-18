@@ -12,6 +12,7 @@ public class PostDetailResponse {
     private final String title;
     private final String content;
     private final LocalDateTime createdDate;
+    private final LocalDateTime updatedDate;
     private final List<String> tags;
     private final String summary;
 
@@ -20,6 +21,7 @@ public class PostDetailResponse {
         this.title = post.getTitle();
         this.content = post.getContent();
         this.createdDate = post.getCreatedDate();
+        this.updatedDate = post.getModifiedDate();
         this.tags = post.getPostTags().stream().map(t -> t.getTag().getName()).toList();
         this.summary =  post.getPostSummary()!=null? post.getPostSummary().getContent(): "no summary";
     }
