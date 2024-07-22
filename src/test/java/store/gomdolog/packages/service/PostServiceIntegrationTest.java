@@ -30,8 +30,6 @@ import store.gomdolog.packages.dto.PostUpdateFormResponse;
 import store.gomdolog.packages.error.PostNotFound;
 import store.gomdolog.packages.repository.CategoryRepository;
 import store.gomdolog.packages.repository.PostRepository;
-import store.gomdolog.packages.repository.PostSummaryRepository;
-import store.gomdolog.packages.repository.PostTagRepository;
 import store.gomdolog.packages.repository.TagRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
@@ -47,11 +45,7 @@ class PostServiceIntegrationTest {
     @Autowired
     private PostService postService;
     @Autowired
-    private PostTagRepository postTagRepository;
-    @Autowired
     private TagRepository tagRepository;
-    @Autowired
-    private PostSummaryRepository postSummaryRepository;
     @Autowired
     private PostTagService postTagService;
 
