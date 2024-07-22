@@ -26,6 +26,7 @@ import store.gomdolog.packages.dto.PostDetailResponse;
 import store.gomdolog.packages.dto.PostResponseWithoutTags;
 import store.gomdolog.packages.dto.PostSaveRequest;
 import store.gomdolog.packages.dto.PostUpdate;
+import store.gomdolog.packages.dto.PostUpdateFormResponse;
 import store.gomdolog.packages.error.PostNotFound;
 import store.gomdolog.packages.repository.CategoryRepository;
 import store.gomdolog.packages.repository.PostRepository;
@@ -141,14 +142,13 @@ class PostServiceIntegrationTest {
         Post post = postRepository.findById(savedId).orElseThrow();
 
         PostUpdate postUpdate = PostUpdate.builder()
-            .id(post.getId())
             .title("수정 제목")
             .content("수정 본문")
             .tags(Arrays.asList("modify1", "modify2"))
             .categoryTitle("Spring")
             .build();
 
-        postService.update(postUpdate);
+        postService.update(post.getId(),postUpdate);
 
         Post updatedPost = postRepository.findById(post.getId()).orElseThrow();
 
@@ -252,6 +252,16 @@ class PostServiceIntegrationTest {
         assertThat(posts.hasNext()).isFalse();
         assertThat(posts.hasPrevious()).isFalse();
         assertThat(posts.getContent()).hasSize(2);
+    }
+
+    @Test
+    void test1() {
+        Post post = postRepository.findAll().get(0);
+
+        PostUpdateFormResponse updateForm = postService.findUpdateForm(post.getId());
+
+        assertThat(updateForm.getTitle()).isEqualTo("제목");
+        assertThat(updateForm.getCategoryTitle()).isEqualTo("spring");
     }
 }
 

@@ -31,9 +31,9 @@ public class AuthController {
 
     @PreAuthorize("permitAll()")
     @PostMapping("/signin")
-    public ResponseEntity<JwtAuthenticationResponse> signIn(
+    public JwtAuthenticationResponse signIn(
         @RequestBody @Valid UserSignInRequest userSignInRequest
     ) {
-        return ResponseEntity.ok().body(userService.signIn(userSignInRequest));
+        return userService.signIn(userSignInRequest);
     }
 }

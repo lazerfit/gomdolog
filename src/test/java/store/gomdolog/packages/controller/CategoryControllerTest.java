@@ -90,9 +90,9 @@ class CategoryControllerTest {
     void update() throws Exception {
         Category category = new Category("Vue.js");
         Category saved = categoryRepository.save(category);
-        CategoryUpdateRequest update = new CategoryUpdateRequest("Spring", saved.getId());
+        CategoryUpdateRequest update = new CategoryUpdateRequest("Spring");
 
-        mockMvc.perform(post("/api/category/update")
+        mockMvc.perform(post("/api/category/update/"+saved.getId())
             .contentType(APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(update)))
             .andDo(print())

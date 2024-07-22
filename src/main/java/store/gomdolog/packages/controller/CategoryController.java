@@ -43,8 +43,8 @@ public class CategoryController {
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    @PostMapping("/category/update")
-    public void update(@RequestBody @Valid CategoryUpdateRequest update) {
-        categoryService.update(update);
+    @PostMapping("/category/update/{id}")
+    public void update(@PathVariable Long id, @RequestBody @Valid CategoryUpdateRequest update) {
+        categoryService.update(id, update);
     }
 }

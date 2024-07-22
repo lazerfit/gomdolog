@@ -145,10 +145,10 @@ class PostControllerTest {
 
         Long postId = postService.save(req);
 
-        PostUpdate postUpdate = new PostUpdate(postId, "수정 제목", "수정 본문", "vue.js",
+        PostUpdate postUpdate = new PostUpdate("수정 제목", "수정 본문", "vue.js",
             Arrays.asList("spring", "vue.js"));
 
-        mockMvc.perform(post("/api/post/update")
+        mockMvc.perform(post("/api/post/update/"+postId)
                 .content(objectMapper.writeValueAsString(postUpdate))
                 .contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
@@ -321,6 +321,25 @@ class PostControllerTest {
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.last").value(true));
+    }
+
+    @Test
+    void updateForm() throws Exception {
+        Category category = categoryRepository.findAll().get(0);
+
+        Post saved = postRepository.save(Post.builder()
+            .title("제목")
+            .content("content")
+            .category(category)
+            .views(3L)
+            .build());
+
+        mockMvc.perform(get("/api/post/update/form/" + saved.getId()))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.categoryTitle").value("vue.js"));
+
+
     }
 
 }

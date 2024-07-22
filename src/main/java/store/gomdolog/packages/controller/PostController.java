@@ -30,6 +30,7 @@ import store.gomdolog.packages.dto.PostDetailResponse;
 import store.gomdolog.packages.dto.PostResponseWithoutTags;
 import store.gomdolog.packages.dto.PostSaveRequest;
 import store.gomdolog.packages.dto.PostUpdate;
+import store.gomdolog.packages.dto.PostUpdateFormResponse;
 import store.gomdolog.packages.service.PostService;
 
 @Slf4j
@@ -54,9 +55,9 @@ public class PostController {
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    @PostMapping("/update")
-    public void update(@RequestBody @Valid PostUpdate postUpdate) {
-        postService.update(postUpdate);
+    @PostMapping("/update/{id}")
+    public void update(@PathVariable Long id, @RequestBody @Valid PostUpdate postUpdate) {
+        postService.update(id,postUpdate);
     }
 
     @PreAuthorize("permitAll()")
@@ -68,6 +69,12 @@ public class PostController {
             .cacheControl(CacheControl.maxAge(30, TimeUnit.DAYS))
             .eTag(etag)
             .body(post);
+    }
+
+    @PreAuthorize("permitAll()")
+    @GetMapping("/update/form/{id}")
+    public PostUpdateFormResponse findUpdateForm(@PathVariable Long id) {
+        return postService.findUpdateForm(id);
     }
 
     @PreAuthorize("permitAll()")

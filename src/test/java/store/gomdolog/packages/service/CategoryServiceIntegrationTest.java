@@ -117,9 +117,9 @@ class CategoryServiceIntegrationTest {
     void update() {
         Category category = new Category("Vue.js");
         Category saved = categoryRepository.save(category);
-        CategoryUpdateRequest update = new CategoryUpdateRequest("Spring", saved.getId());
+        CategoryUpdateRequest update = new CategoryUpdateRequest("Spring");
 
-        Category category1 = categoryRepository.findById(update.id()).orElseThrow();
+        Category category1 = categoryRepository.findById(saved.getId()).orElseThrow();
         category1.update(update);
 
         assertThat(update.title()).isEqualTo(category1.getTitle());

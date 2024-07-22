@@ -29,6 +29,7 @@ import store.gomdolog.packages.dto.PostResponseWithoutTags;
 import store.gomdolog.packages.dto.PostSaveRequest;
 import store.gomdolog.packages.dto.PostSummaryDTO;
 import store.gomdolog.packages.dto.PostUpdate;
+import store.gomdolog.packages.dto.PostUpdateFormResponse;
 import store.gomdolog.packages.error.PostNotFound;
 import store.gomdolog.packages.repository.PostRepository;
 
@@ -104,6 +105,12 @@ public class PostService {
         return new PostDetailResponse(post);
     }
 
+    @Transactional(readOnly = true)
+    public PostUpdateFormResponse findUpdateForm(Long id) {
+        Post post = postRepository.findOneById(id).orElseThrow(PostNotFound::new);
+        return new PostUpdateFormResponse(post);
+    }
+
     @Cacheable(value = "postAllCache", key = "{#pageable.pageNumber}", unless = "#result == null")
     @Transactional(readOnly = true)
     public Page<PostResponseWithoutTags> findAll(Pageable pageable) {
@@ -155,8 +162,8 @@ public class PostService {
 
     @CacheEvict(value = {"postAllCache", "postByCategory", "postCache"}, allEntries = true)
     @Transactional
-    public void update(PostUpdate update) {
-        Post post = postRepository.findById(update.id()).orElseThrow(PostNotFound::new);
+    public void update(Long id, PostUpdate update) {
+        Post post = postRepository.findById(id).orElseThrow(PostNotFound::new);
         post.update(update);
 
         if (!update.categoryTitle().equals(post.getCategory().getTitle())) {
