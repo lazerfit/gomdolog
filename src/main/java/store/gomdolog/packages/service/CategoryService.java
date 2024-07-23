@@ -61,8 +61,8 @@ public class CategoryService {
 
     @CacheEvict(value = "categoryCache", allEntries = true)
     @Transactional
-    public void update(CategoryUpdateRequest update) {
-        Category category = categoryRepository.findById(update.id()).orElseThrow(CategoryNotFound::new);
+    public void update(Long id,CategoryUpdateRequest update) {
+        Category category = categoryRepository.findById(id).orElseThrow(CategoryNotFound::new);
         category.update(update);
     }
 
